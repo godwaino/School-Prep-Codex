@@ -259,9 +259,6 @@ h1 {
   box-shadow: var(--shadow-sm);
 }
 
-.sticky-card {
-  /* sticky removed — it covered the workspace tabs below it */
-}
 
 /* ── Typography ── */
 
@@ -462,7 +459,8 @@ textarea:focus {
   align-items: center;
 }
 
-.check-inline input {
+.check-inline input,
+.check-item input[type="checkbox"] {
   width: auto;
 }
 

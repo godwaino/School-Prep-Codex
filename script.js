@@ -43,7 +43,6 @@ const EVIDENCE_ITEMS = [
   'Proof of address checklist completed',
 ];
 
-const keyDatesList = document.getElementById('keyDatesList');
 const keyDatesListTab = document.getElementById('keyDatesListTab');
 const nextDeadlineCard = document.getElementById('nextDeadlineCard');
 const setupState = document.getElementById('setupState');
@@ -98,7 +97,7 @@ function renderNextDeadline() {
 }
 
 function renderKeyDates() {
-  const targets = [keyDatesList, keyDatesListTab].filter(Boolean);
+  const targets = [keyDatesListTab].filter(Boolean);
   targets.forEach((targetList) => {
     targetList.innerHTML = '';
     KEY_DATES.forEach((item) => {
