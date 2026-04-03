@@ -166,6 +166,7 @@ const studyPlan = document.getElementById('studyPlan');
 const evidenceChecklist = document.getElementById('evidenceChecklist');
 const splitOutput = document.getElementById('splitOutput');
 const practiceSplitOutput = document.getElementById('practiceSplitOutput');
+const practiceActionList = document.getElementById('practiceActionList');
 const practiceNextAction = document.getElementById('practiceNextAction');
 
 const childName = document.getElementById('childName');
@@ -241,6 +242,24 @@ function getRecentSubjectUsage(days = 7) {
   return counts;
 }
 
+function getRecencyWeightedUsage(days = 14) {
+  const progress = getProgressData();
+  const scores = { english: 0, maths: 0, verbal: 0, nvr: 0 };
+  const now = Date.now();
+  progress.sessions.forEach((session) => {
+    const ageDays = (now - new Date(session.date).getTime()) / (24 * 60 * 60 * 1000);
+    if (ageDays > days) return;
+    const decay = Math.exp(-ageDays / 5);
+    scores[session.subject] = (scores[session.subject] || 0) + (session.total * decay);
+  });
+  return scores;
+}
+
+function getSubjectAttemptCount(subject) {
+  const progress = getProgressData();
+  return progress.accuracyBySubject[subject]?.attempted || 0;
+}
+
 function getStudyPriorityWeights() {
   const total = Number(weeklyHours.value || 8);
   const mathsWeight = Math.max(1, Math.round(total * 0.3));
@@ -259,21 +278,39 @@ function getSubjectAccuracy(subject) {
 
 function getRecommendation() {
   const usage = getRecentSubjectUsage();
+  const weightedUsage = getRecencyWeightedUsage();
   const weights = getStudyPriorityWeights();
+  const reasonBySubject = {};
+
   const scores = Object.keys(SUBJECTS).map((subject) => {
     const accuracy = getSubjectAccuracy(subject);
+    const attempts = getSubjectAttemptCount(subject);
+    const hasConfidence = attempts >= 8;
     const practicePenalty = usage[subject] || 0;
-    const weaknessBonus = accuracy === null ? 5 : Math.max(0, 80 - accuracy) / 10;
-    const score = weights[subject] + weaknessBonus - practicePenalty * 0.4;
-    return { subject, score, accuracy };
+    const recencyPenalty = (weightedUsage[subject] || 0) * 0.3;
+    const weaknessBonus = (accuracy !== null && hasConfidence) ? Math.max(0, 80 - accuracy) / 10 : 0;
+    const coverageBonus = attempts < 8 ? 2.5 : 0;
+    const score = weights[subject] + weaknessBonus + coverageBonus - practicePenalty * 0.2 - recencyPenalty;
+
+    const reasons = [];
+    if (coverageBonus > 0) reasons.push({ code: 'coverage', label: 'Low coverage' });
+    if (weaknessBonus > 0) reasons.push({ code: 'accuracy', label: 'Lower accuracy' });
+    if (weights[subject] >= Math.max(...Object.values(weights))) reasons.push({ code: 'plan', label: 'Higher weekly plan allocation' });
+    if ((weightedUsage[subject] || 0) < 2) reasons.push({ code: 'recency', label: 'Less recent practice' });
+    reasonBySubject[subject] = reasons;
+
+    return { subject, score, accuracy, hasConfidence, attempts };
   }).sort((a, b) => b.score - a.score);
 
   const top = scores[0];
-  const reason = top.accuracy !== null && top.accuracy < 75
-    ? `Recommended because ${SUBJECTS[top.subject]} is currently your weakest area.`
-    : `Recommended because ${SUBJECTS[top.subject]} has had less practice this week.`;
+  const reasonChips = reasonBySubject[top.subject] || [{ code: 'balance', label: 'Balanced practice suggestion' }];
+  const reason = top.hasConfidence && top.accuracy !== null && top.accuracy < 75
+    ? `Recommended because ${SUBJECTS[top.subject]} has lower recent accuracy.`
+    : top.attempts < 8
+      ? `Recommended because ${SUBJECTS[top.subject]} has lower coverage so far.`
+      : `Recommended because ${SUBJECTS[top.subject]} has had less recent practice.`;
 
-  return { subject: top.subject, reason };
+  return { subject: top.subject, reason, reasonChips };
 }
 
 function pickQuestions({ subject = 'mixed', size = 5, mode = 'daily5' }) {
@@ -429,6 +466,7 @@ function renderRevisionSplit() {
   const sum = Object.values(weights).reduce((a, b) => a + b, 0);
   const toSessions = (w) => Math.max(1, Math.round((w / sum) * 5));
   practiceSplitOutput.textContent = `Suggested weekly practice split: English ${toSessions(weights.english)} short sessions • Verbal ${toSessions(weights.verbal)} • Non-Verbal ${toSessions(weights.nvr)} • Maths ${toSessions(weights.maths)}.`;
+  renderPracticeActions();
 }
 
 function renderRisk() {
@@ -548,13 +586,19 @@ function renderTodayPracticeCard() {
     <h4>Today’s Practice</h4>
     <p><strong>Recommended focus:</strong> ${SUBJECTS[recommendation.subject]}</p>
     <p>5 questions • Estimated time: 8–10 minutes</p>
+    <div class="reason-chips">${recommendation.reasonChips.map((chip) => `<span class="badge">${chip.label}</span>`).join('')}</div>
     <button class="btn-inline" id="startTodayPractice">Start</button>
+    <button class="btn-inline btn-quiet" id="addTodayPracticeToPlan">Add to this week's plan</button>
     <p class="small">${recommendation.reason}</p>
   `;
 
   document.getElementById('startTodayPractice')?.addEventListener('click', () => {
     document.querySelector('[data-tab="practice"]').click();
     startPracticeSession('daily5', recommendation.subject);
+  });
+
+  document.getElementById('addTodayPracticeToPlan')?.addEventListener('click', () => {
+    addPracticeAction(`${SUBJECTS[recommendation.subject]} Daily 5`);
   });
 }
 
@@ -563,12 +607,18 @@ function renderRecommendedPractice() {
   recommendedPractice.innerHTML = `
     <h4>Recommended next practice</h4>
     <p>${SUBJECTS[recommendation.subject]} Daily 5</p>
+    <div class="reason-chips">${recommendation.reasonChips.map((chip) => `<span class="badge">${chip.label}</span>`).join('')}</div>
     <p class="small">${recommendation.reason}</p>
     <button class="btn-inline" id="startRecommendedPractice">Start recommended session</button>
+    <button class="btn-inline btn-quiet" id="addRecommendedToPlan">Add to this week's plan</button>
   `;
 
   document.getElementById('startRecommendedPractice')?.addEventListener('click', () => {
     startPracticeSession('daily5', recommendation.subject);
+  });
+
+  document.getElementById('addRecommendedToPlan')?.addEventListener('click', () => {
+    addPracticeAction(`${SUBJECTS[recommendation.subject]} Daily 5`);
   });
 }
 
@@ -843,6 +893,7 @@ function finishPracticeSession() {
     <p><strong>Time taken:</strong> ${Math.floor(timeTakenSeconds / 60)}m ${timeTakenSeconds % 60}s</p>
     <p><strong>Areas attempted:</strong> ${SUBJECTS[currentPracticeSession.subject]}</p>
     <p><strong>Recommended next step:</strong> ${recommendation}</p>
+    <button class="btn-inline btn-quiet" id="addResultActionBtn">Add this recommendation to this week's plan</button>
     <details open>
       <summary>Review explanations</summary>
       <ol class="result-list">${questionBreakdown}</ol>
@@ -850,9 +901,58 @@ function finishPracticeSession() {
   `;
 
   practiceSession.innerHTML = '';
+  document.getElementById('addResultActionBtn')?.addEventListener('click', () => {
+    addPracticeAction(correct / total >= 0.75
+      ? `${SUBJECTS[progress.sessions[progress.sessions.length - 1].subject]} Timed Drill`
+      : `${SUBJECTS[progress.sessions[progress.sessions.length - 1].subject]} Mini Quiz`);
+  });
   currentPracticeSession = null;
   renderPracticeSection();
   renderReadiness();
+}
+
+function getPracticeActions() {
+  return JSON.parse(localStorage.getItem('practice-actions') || '[]');
+}
+
+function savePracticeActions(actions) {
+  localStorage.setItem('practice-actions', JSON.stringify(actions));
+}
+
+function addPracticeAction(actionLabel) {
+  const actions = getPracticeActions();
+  const entry = {
+    id: `practice-action-${Date.now()}`,
+    label: actionLabel,
+    done: false,
+  };
+  actions.unshift(entry);
+  savePracticeActions(actions.slice(0, 10));
+  renderPracticeActions();
+}
+
+function renderPracticeActions() {
+  if (!practiceActionList) return;
+  const actions = getPracticeActions();
+  if (!actions.length) {
+    practiceActionList.innerHTML = `<p class="small">No practice actions added yet. Use “Add to this week's plan” from Today’s Practice or Results.</p>`;
+    return;
+  }
+
+  practiceActionList.innerHTML = actions.map((item) => `
+    <label class="check-item ${item.done ? 'done' : ''}">
+      <input type="checkbox" data-action-id="${item.id}" ${item.done ? 'checked' : ''}/>
+      ${item.label}
+    </label>
+  `).join('');
+
+  practiceActionList.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
+    checkbox.addEventListener('change', () => {
+      const next = getPracticeActions().map((item) => (item.id === checkbox.dataset.actionId ? { ...item, done: checkbox.checked } : item));
+      savePracticeActions(next);
+      renderPracticeActions();
+    });
+  });
 }
 
 function renderPracticeNextAction() {

@@ -836,6 +836,13 @@ textarea:focus-visible {
   gap: 0.5rem;
 }
 
+.reason-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.4rem 0 0.6rem;
+}
+
 .subject-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
