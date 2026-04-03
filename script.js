@@ -200,6 +200,35 @@ QUESTION_BANK.forEach((question) => {
   }
 });
 
+function runPracticeIntegrityChecks() {
+  const issues = [];
+  const countsBySubject = Object.keys(SUBJECTS).reduce((acc, key) => ({ ...acc, [key]: 0 }), {});
+
+  QUESTION_BANK.forEach((question) => {
+    countsBySubject[question.subject] = (countsBySubject[question.subject] || 0) + 1;
+    if (!Array.isArray(question.options) || question.options.length < 2) {
+      issues.push(`[${question.id}] needs at least 2 answer options.`);
+    }
+    if (question.correctOptionIndex < 0 || question.correctOptionIndex >= question.options.length) {
+      issues.push(`[${question.id}] has an out-of-range correctOptionIndex.`);
+    }
+    if (!question.explanation || question.explanation.length < 8) {
+      issues.push(`[${question.id}] explanation is too short for coaching feedback.`);
+    }
+    if (question.media && question.media.type === 'image' && !question.media.src) {
+      issues.push(`[${question.id}] image media is missing src.`);
+    }
+  });
+
+  Object.entries(countsBySubject).forEach(([subject, count]) => {
+    if (count < 20) issues.push(`[${subject}] has ${count} questions (expected at least 20).`);
+  });
+
+  if (issues.length) {
+    console.warn('Practice integrity checks found issues:', issues);
+  }
+}
+
 const keyDatesListTab = document.getElementById('keyDatesListTab');
 const nextDeadlineCard = document.getElementById('nextDeadlineCard');
 const setupState = document.getElementById('setupState');
@@ -586,13 +615,29 @@ function initTabs() {
   const tabs = document.querySelectorAll('.tab');
   const panels = document.querySelectorAll('.tab-panel');
 
-  function activate(tabName) {
+  function activate(tabName, panToPanel = true) {
     tabs.forEach((t) => t.classList.toggle('active', t.dataset.tab === tabName));
     panels.forEach((p) => p.classList.toggle('active', p.id === `tab-${tabName}`));
+
+    if (panToPanel) {
+      const targetPanel = document.getElementById(`tab-${tabName}`);
+      if (targetPanel) {
+        requestAnimationFrame(() => {
+          targetPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      }
+    }
   }
 
   tabs.forEach((tab) => {
-    tab.addEventListener('click', () => activate(tab.dataset.tab));
+    tab.addEventListener('click', () => activate(tab.dataset.tab, true));
+  });
+
+  document.querySelectorAll('[data-start-mode]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.startMode;
+      startPracticeSession(mode, mode === 'daily5' ? 'mixed' : getRecommendation().subject);
+    });
   });
 
   document.querySelectorAll('[data-start-mode]').forEach((btn) => {
@@ -603,7 +648,7 @@ function initTabs() {
   });
 
   const initial = document.querySelector('.tab.active')?.dataset.tab || 'dashboard';
-  activate(initial);
+  activate(initial, false);
 }
 
 function updateBudgetOutput() {
@@ -766,6 +811,10 @@ function startPracticeSession(mode, subject = 'mixed') {
 
   const config = getModeConfig(mode, subject);
   const questions = pickQuestions({ subject: config.subject, size: config.size, mode: mode === 'mini' ? 'mini' : mode === 'timed' ? 'timed' : 'daily5' });
+  if (!questions.length) {
+    practiceResults.innerHTML = '<p class="small">No questions are currently available for this mode. Please try another mode or subject.</p>';
+    return;
+  }
   const feedbackMode = mode === 'daily5' ? 'instant' : 'end';
 
   currentPracticeSession = {
@@ -786,6 +835,9 @@ function startPracticeSession(mode, subject = 'mixed') {
   practiceResults.innerHTML = '';
   renderPracticeQuestion();
   if (currentPracticeSession.timeLimitSeconds > 0) startTimer();
+  requestAnimationFrame(() => {
+    practiceSession.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
 }
 
 function startTimer() {
@@ -1071,6 +1123,7 @@ function renderPracticeSection() {
 }
 
 hydrateSavedSetup();
+runPracticeIntegrityChecks();
 populateCatchmentDatalist();
 renderNextDeadline();
 renderKeyDates();
