@@ -640,6 +640,13 @@ function initTabs() {
     });
   });
 
+  document.querySelectorAll('[data-start-mode]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.startMode;
+      startPracticeSession(mode, mode === 'daily5' ? 'mixed' : getRecommendation().subject);
+    });
+  });
+
   const initial = document.querySelector('.tab.active')?.dataset.tab || 'dashboard';
   activate(initial, false);
 }
