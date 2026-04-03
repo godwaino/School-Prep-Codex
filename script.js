@@ -39,6 +39,7 @@ const EVIDENCE_ITEMS = [
 ];
 
 const keyDatesList = document.getElementById('keyDatesList');
+const keyDatesListTab = document.getElementById('keyDatesListTab');
 const nextDeadlineCard = document.getElementById('nextDeadlineCard');
 const setupState = document.getElementById('setupState');
 const readinessBlock = document.getElementById('readinessBlock');
@@ -90,19 +91,22 @@ function renderNextDeadline() {
 }
 
 function renderKeyDates() {
-  keyDatesList.innerHTML = '';
-  KEY_DATES.forEach((item) => {
-    const status = statusTag(item.date);
-    const line = document.createElement('article');
-    line.className = `date-item ${status} ${item.critical ? 'critical' : ''}`;
-    line.innerHTML = `
-      <div>
-        <p class="date">${displayDate(item)}</p>
-        <h3>${item.title}</h3>
-      </div>
-      <span class="pill">${status === 'completed' ? 'Completed' : status === 'upcoming' ? 'Upcoming' : 'Planned'}</span>
-    `;
-    keyDatesList.appendChild(line);
+  const targets = [keyDatesList, keyDatesListTab].filter(Boolean);
+  targets.forEach((targetList) => {
+    targetList.innerHTML = '';
+    KEY_DATES.forEach((item) => {
+      const status = statusTag(item.date);
+      const line = document.createElement('article');
+      line.className = `date-item ${status} ${item.critical ? 'critical' : ''}`;
+      line.innerHTML = `
+        <div>
+          <p class="date">${displayDate(item)}</p>
+          <h3>${item.title}</h3>
+        </div>
+        <span class="pill">${status === 'completed' ? 'Completed' : status === 'upcoming' ? 'Upcoming' : 'Planned'}</span>
+      `;
+      targetList.appendChild(line);
+    });
   });
 }
 
@@ -233,14 +237,21 @@ function downloadICS() {
 }
 
 function initTabs() {
-  document.querySelectorAll('.tab').forEach((tab) => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
-      tab.classList.add('active');
-      const target = document.getElementById(`tab-${tab.dataset.tab}`);
-      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+  document.body.classList.add('js-tabs');
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.tab-panel');
+
+  function activate(tabName) {
+    tabs.forEach((t) => t.classList.toggle('active', t.dataset.tab === tabName));
+    panels.forEach((p) => p.classList.toggle('active', p.id === `tab-${tabName}`));
+  }
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => activate(tab.dataset.tab));
   });
+
+  const initial = document.querySelector('.tab.active')?.dataset.tab || 'dashboard';
+  activate(initial);
 }
 
 function updateBudgetOutput() {

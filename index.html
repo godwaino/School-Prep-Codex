@@ -92,12 +92,20 @@
       <section id="workspace" class="card">
         <h2>Planner workspace</h2>
         <div class="tabs" role="tablist" aria-label="Planner tabs">
+          <button class="tab" data-tab="keydates" role="tab">Key Dates</button>
           <button class="tab active" data-tab="dashboard" role="tab">Dashboard</button>
           <button class="tab" data-tab="study" role="tab">Study Plan</button>
           <button class="tab" data-tab="catchment" role="tab">Catchment</button>
           <button class="tab" data-tab="property" role="tab">Property</button>
           <button class="tab" data-tab="evidence" role="tab">Evidence</button>
         </div>
+
+
+        <section id="tab-keydates" class="tab-panel" role="tabpanel">
+          <h3>Key Dates</h3>
+          <p class="small">Official milestones for September 2027 entry.</p>
+          <div id="keyDatesListTab" class="date-list"></div>
+        </section>
 
         <section id="tab-dashboard" class="tab-panel active" role="tabpanel">
           <h3>Admissions Dashboard</h3>

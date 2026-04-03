@@ -84,6 +84,8 @@ input, textarea { font: inherit; border: 1px solid #cad3ef; border-radius: 10px;
 .tab { border: 1px solid #cad2f1; border-radius: 999px; background: #fff; color: #2f3a66; padding: .45rem .75rem; cursor: pointer; }
 .tab.active { background: var(--accent-soft); font-weight: 700; }
 .tab-panel { display: block; margin-bottom: 1rem; }
+.js-tabs .tab-panel { display: none; }
+.js-tabs .tab-panel.active { display: block; }
 
 .countdown-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(170px,1fr)); gap: .6rem; }
 .count-card { border: 1px solid var(--border); border-radius: 10px; padding: .65rem; background: #fcfdff; }
