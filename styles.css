@@ -1,0 +1,117 @@
+:root {
+  --bg: #f5f7fb;
+  --card: #ffffff;
+  --text: #1a1f36;
+  --accent: #194fa6;
+  --accent-soft: #e8f0ff;
+  --ok: #0f8b57;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+h1,
+h2 {
+  margin: 0 0 0.75rem;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 1rem;
+  margin: 1rem 0;
+  box-shadow: 0 2px 12px rgba(11, 32, 68, 0.08);
+}
+
+.actions,
+.grid-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.actions {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.grid-form {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  align-items: end;
+}
+
+label {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+}
+
+input,
+button {
+  font: inherit;
+  padding: 0.65rem;
+  border-radius: 8px;
+  border: 1px solid #ccd4e4;
+}
+
+button {
+  cursor: pointer;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+}
+
+button:hover {
+  opacity: 0.92;
+}
+
+.deadline-item,
+.check-item {
+  padding: 0.8rem;
+  border: 1px solid #dbe4f4;
+  border-radius: 10px;
+  margin: 0.6rem 0;
+  background: #fcfdff;
+}
+
+.deadline-item.soon {
+  border-color: #f4b000;
+  background: #fff8e6;
+}
+
+.check-item.done {
+  background: #e9f9f1;
+  border-color: #bde9d2;
+}
+
+.small {
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.listing-links a {
+  display: inline-block;
+  margin: 0.35rem 0.5rem 0.35rem 0;
+  padding: 0.5rem 0.7rem;
+  background: var(--accent-soft);
+  border-radius: 7px;
+  text-decoration: none;
+}
+
+.tag {
+  font-size: 0.8rem;
+  color: var(--ok);
+  font-weight: 600;
+}

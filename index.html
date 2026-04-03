@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LSS 2027 Admission Planner</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>Lawrence Sheriff School 2027 Planner</h1>
+        <p>
+          A practical command centre for 11+ prep, admissions deadlines, and
+          catchment-area move decisions.
+        </p>
+      </header>
+
+      <section class="card">
+        <h2>Your Strategy Snapshot</h2>
+        <ul>
+          <li><strong>Target intake:</strong> September 2027</li>
+          <li><strong>11+ exam window:</strong> September 2026</li>
+          <li><strong>Current status:</strong> Outside catchment (editable in checklist below)</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Official Timeline & Deadline Alerts</h2>
+        <p>
+          Dates below are taken from the Lawrence Sheriff School Admissions
+          Policy 2027–2028 and turned into reminders.
+        </p>
+        <div class="actions">
+          <button id="notifyBtn">Enable browser notifications</button>
+          <button id="calendarBtn">Download calendar (.ics)</button>
+        </div>
+        <div id="deadlineList" class="deadline-list"></div>
+      </section>
+
+      <section class="card">
+        <h2>Power Moves (High-Impact Actions)</h2>
+        <div id="powerMoves" class="checklist"></div>
+      </section>
+
+      <section class="card">
+        <h2>Catchment Move Decision Tool</h2>
+        <form id="listingForm" class="grid-form">
+          <label>
+            Target area / town
+            <input id="area" value="Rugby" required />
+          </label>
+          <label>
+            Max budget (£)
+            <input id="maxBudget" type="number" value="500000" min="50000" step="5000" required />
+          </label>
+          <label>
+            Min budget (£)
+            <input id="minBudget" type="number" value="300000" min="0" step="5000" />
+          </label>
+          <label>
+            Bedrooms (minimum)
+            <input id="bedrooms" type="number" value="3" min="1" max="8" />
+          </label>
+          <label>
+            Radius from Rugby Water Tower (miles)
+            <input id="radius" type="number" value="10" min="1" max="25" />
+          </label>
+          <button type="submit">Find live listings</button>
+        </form>
+
+        <div id="listingLinks" class="listing-links"></div>
+        <p class="small">
+          Tip: Save searches and activate email alerts in each portal so you are
+          notified when suitable homes appear.
+        </p>
+      </section>
+
+      <section class="card">
+        <h2>Prep Resources</h2>
+        <ul>
+          <li><a href="https://www.lawrencesheriffschool.net/admissions/admissions-policy" target="_blank" rel="noreferrer">Lawrence Sheriff admissions policies</a></li>
+          <li><a href="https://www.warwickshire.gov.uk/grammar-schools-11-test" target="_blank" rel="noreferrer">Warwickshire 11+ registration/test process</a></li>
+          <li><a href="https://www.atomlearning.com/blog/west-midlands-grammar-schools-11-plus" target="_blank" rel="noreferrer">Atom guide to West Midlands grammar school 11+</a></li>
+        </ul>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
