@@ -3,142 +3,136 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LSS 2027 Admissions Mission Control</title>
+    <title>Lawrence Sheriff 2027 Admissions Planner</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header class="topbar">
-      <div class="wrap nav-inner">
-        <div class="brand">LSS Mission Control</div>
-        <nav>
-          <a href="#dashboard">Dashboard</a>
-          <a href="#timeline">Timeline</a>
-          <a href="#study">Study Plan</a>
-          <a href="#property">Property</a>
-        </nav>
+    <header class="hero">
+      <div class="wrap">
+        <p class="kicker">Year 7 entry: September 2027</p>
+        <h1>Lawrence Sheriff 2027 Admissions Planner</h1>
+        <p class="subtitle">
+          Track the key deadlines, check catchment, organise evidence, plan
+          revision, and stay ahead for Year 7 entry in September 2027.
+        </p>
+        <div class="hero-actions">
+          <a href="#next-actions" class="btn">Start my plan</a>
+          <a href="#key-dates" class="btn btn-secondary">View 2027 key dates</a>
+        </div>
       </div>
     </header>
 
-    <section class="hero">
-      <div class="wrap hero-inner">
-        <p class="eyebrow">Year 7 Entry • September 2027</p>
-        <h1>Lawrence Sheriff Admissions Planner</h1>
-        <p class="hero-copy">
-               </p>
-        <div class="hero-actions">
-          <button id="notifyBtn">Enable notifications</button>
-          <button id="calendarBtn" class="ghost">Download .ics calendar</button>
-        </div>
+    <section class="trust-strip" aria-label="Trust information">
+      <div class="wrap trust-grid">
+        <span>Built around official Warwickshire and Lawrence Sheriff admissions information</span>
+        <span>2027 timeline verified</span>
+        <span>Local data saved on this device</span>
       </div>
     </section>
 
-    <main class="wrap main-grid">
-      <section id="dashboard" class="panel span-12">
-        <h2>Live Countdown Dashboard</h2>
-        <div id="countdownCards" class="countdown-grid"></div>
+    <main class="wrap main">
+      <section id="key-dates" class="card sticky-card">
+        <div class="section-head">
+          <h2>Key dates for 2027 entry</h2>
+          <button id="calendarBtn" class="btn-inline">Download calendar (.ics)</button>
+        </div>
+        <div id="keyDatesList" class="date-list"></div>
       </section>
 
+      <section id="next-actions" class="card">
+        <h2>Next 3 actions</h2>
+        <div id="setupState" class="setup-state"></div>
+        <div class="setup-grid">
+          <label>
+            Add child details
+            <input id="childName" placeholder="Child first name" />
+          </label>
+          <label class="check-inline">
+            <input id="catchmentChecked" type="checkbox" />
+            I have checked catchment eligibility
+          </label>
+          <label>
+            Set weekly revision hours
+            <input id="weeklyHours" type="number" min="1" max="40" value="8" />
+          </label>
+        </div>
+      </section>
 
-      <section class="panel span-12">
-        <h2>Readiness Score & Risk Radar</h2>
-        <div class="radar-grid">
-          <article>
-            <p class="small">Overall readiness</p>
-            <p id="readinessScore" class="big">0%</p>
-            <div class="meter"><span id="readinessBar"></span></div>
-          </article>
-          <article>
-            <p class="small">Deadline risk (next 30 days)</p>
-            <p id="riskStatus" class="big">Low</p>
-            <div class="meter warning"><span id="riskBar"></span></div>
-          </article>
-          <article>
-            <p class="small">Weekly revision split helper</p>
-            <label>
-              Total hours/week
-              <input id="weeklyHours" type="number" min="1" max="40" value="8" />
+      <section class="card">
+        <h2>Readiness overview</h2>
+        <div id="readinessBlock" class="readiness"></div>
+      </section>
+
+      <section class="card">
+        <h2>Planner workspace</h2>
+        <div class="tabs" role="tablist" aria-label="Planner tabs">
+          <button class="tab active" data-tab="dashboard" role="tab">Dashboard</button>
+          <button class="tab" data-tab="study" role="tab">Study Plan</button>
+          <button class="tab" data-tab="catchment" role="tab">Catchment</button>
+          <button class="tab" data-tab="property" role="tab">Property</button>
+          <button class="tab" data-tab="evidence" role="tab">Evidence</button>
+        </div>
+
+        <section id="tab-dashboard" class="tab-panel active" role="tabpanel">
+          <h3>Admissions Dashboard</h3>
+          <div id="countdownCards" class="countdown-grid"></div>
+          <div class="inline-note" id="deadlineRisk"></div>
+          <button id="notifyBtn" class="btn-inline">Enable browser reminders</button>
+        </section>
+
+        <section id="tab-study" class="tab-panel" role="tabpanel">
+          <h3>Suggested weekly revision split</h3>
+          <p id="splitOutput" class="small"></p>
+          <div id="studyPlan" class="checklist"></div>
+          <button id="printStudyPlan" class="btn-inline">Print study checklist</button>
+        </section>
+
+        <section id="tab-catchment" class="tab-panel" role="tabpanel">
+          <h3>Catchment guidance</h3>
+          <div class="badges">
+            <span class="badge">Verified source</span>
+            <span class="badge">Last checked: 3 April 2026</span>
+          </div>
+          <p><strong>Priority Circle:</strong> 10.004 miles from Rugby Water Tower.</p>
+          <p><strong>Residency evidence deadline:</strong> 31 December 2026 at 23:59.</p>
+          <p><strong>Eastern Area of Warwickshire:</strong> includes Rugby and specified local parishes in the admissions policy.</p>
+          <details>
+            <summary>View Eastern Area place list</summary>
+            <p class="small">Dunchurch, Cawston, Thurlaston, Leamington Hastings, Birdingbury, Grandborough, Wolfhamcote, Willoughby, Binley Woods, Brinklow, Brandon and Bretford, Ryton-on-Dunsmore, Bubbenhall, Wolston, Church Lawford, Long Lawford, Stretton-on-Dunsmore, Princethorpe, Frankton, Marton, Bourton and Draycote, Churchover, Clifton-upon-Dunsmore, Combe Fields, Cosford, Easenhall, Harborough Magna, Kings Newnham, Little Lawford, Monks Kirby, Newton and Biggin, Pailton, Stretton-under-Fosse, Wibtoft, Willey, Withybrook.</p>
+          </details>
+          <p class="small">Official admissions policy always takes precedence.</p>
+        </section>
+
+        <section id="tab-property" class="tab-panel" role="tabpanel">
+          <h3>Explore homes in catchment</h3>
+          <p class="small">Useful for planning only — admissions deadlines and eligibility still come first.</p>
+          <form id="listingForm" class="property-form">
+            <label>Area<input id="area" value="Rugby" required /></label>
+            <label>Bedrooms<input id="bedrooms" type="number" value="3" min="1" max="8" /></label>
+            <label>Budget cap
+              <input id="budgetSlider" type="range" min="100000" max="1200000" step="5000" value="500000" />
+              <output id="budgetOutput">£500,000</output>
             </label>
-            <p id="splitOutput" class="small"></p>
-          </article>
-        </div>
+            <button type="submit" class="btn-inline">Find listings</button>
+          </form>
+          <div id="listingLinks" class="listing-links"></div>
+        </section>
+
+        <section id="tab-evidence" class="tab-panel" role="tabpanel">
+          <h3>Evidence Folder</h3>
+          <p class="small">Keep everything in one place so nothing gets missed.</p>
+          <div id="evidenceChecklist" class="checklist"></div>
+          <textarea id="parentNotes" rows="8" placeholder="House proofs, open day notes, admissions calls, registration confirmations..."></textarea>
+        </section>
       </section>
 
-      <section id="timeline-section" class="panel span-8">
-        <h2>Visual Timeline: 2026 → September 2027</h2>
-        <div id="timeline" class="timeline"></div>
-      </section>
-
-      <section class="panel span-4 sticky">
-        <h2>11+ Weighting</h2>
-        <div class="weighting-stack">
-          <article><span>English / VR</span><strong>50%</strong></article>
-          <article><span>NVR</span><strong>25%</strong></article>
-          <article><span>Maths</span><strong>25%</strong></article>
-        </div>
-        <p class="small">Plan your weekly hours in these proportions.</p>
-      </section>
-
-      <section id="study" class="panel span-8">
-        <h2>6-Month Study Plan</h2>
-        <p class="small">Interactive checklist saved to local storage.</p>
-        <div id="studyPlan" class="checklist"></div>
-      </section>
-
-      <section class="panel span-4">
-        <h2>Power Moves (8)</h2>
-        <div id="powerMoves" class="checklist compact"></div>
-      </section>
-
-      <section class="panel span-4">
-        <h2>Parent Notes & Evidence Vault</h2>
-        <p class="small">Keep one-source notes for proofs, open days, and admissions calls.</p>
-        <textarea id="parentNotes" rows="10" placeholder="e.g. Tenancy start date, council tax date, documents pending..."></textarea>
-      </section>
-
-
-      <section class="panel span-12 catchment-block">
-        <h2>Exact Catchment Areas (Admissions 2027–2028)</h2>
-        <p>
-          Priority Circle: <strong>10.004 miles</strong> from Rugby Water Tower,
-          plus Eastern Area of Warwickshire criteria.
-        </p>
-        <details>
-          <summary>View exact Eastern Area place list</summary>
-          <p class="small">
-            Rugby plus Dunchurch, Cawston, Thurlaston, Leamington Hastings,
-            Birdingbury, Grandborough, Wolfhamcote, Willoughby, Binley Woods,
-            Brinklow, Brandon and Bretford, Ryton-on-Dunsmore, Bubbenhall,
-            Wolston, Church Lawford, Long Lawford, Stretton-on-Dunsmore,
-            Princethorpe, Frankton, Marton, Bourton and Draycote, Churchover,
-            Clifton-upon-Dunsmore, Combe Fields, Cosford, Easenhall,
-            Harborough Magna, Kings Newnham, Little Lawford, Monks Kirby,
-            Newton and Biggin, Pailton, Stretton-under-Fosse, Wibtoft,
-            Willey, Withybrook.
-          </p>
-        </details>
-        <p class="small">Residency evidence deadline: <strong>31 December 2026, 23:59</strong>.</p>
-      </section>
-
-      <section id="property" class="panel span-12 property-panel">
-        <h2>Catchment & Property Search</h2>
-        <form id="listingForm" class="search-form">
-          <label>
-            Area
-            <input id="area" value="Rugby" required />
-          </label>
-          <label>
-            Bedrooms
-            <input id="bedrooms" type="number" value="3" min="1" max="8" />
-          </label>
-          <label>
-            Budget cap
-            <input id="budgetSlider" type="range" min="100000" max="1200000" step="5000" value="500000" />
-            <output id="budgetOutput">£500,000</output>
-          </label>
-          <button type="submit">Find live listings</button>
-        </form>
-        <div id="listingLinks" class="listing-links"></div>
-      </section>
+      <footer class="card footer-sources">
+        <h2>Information sources</h2>
+        <ul>
+          <li><a href="https://www.lawrencesheriffschool.net/admissions/admissions-policy" target="_blank" rel="noreferrer">Lawrence Sheriff School admissions policy</a></li>
+          <li><a href="https://www.warwickshire.gov.uk/grammar-schools-11-test" target="_blank" rel="noreferrer">Warwickshire grammar school 11+ process</a></li>
+        </ul>
+      </footer>
     </main>
 
     <script src="script.js"></script>

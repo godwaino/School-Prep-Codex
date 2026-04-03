@@ -1,258 +1,277 @@
+const PRIORITY_RADIUS_MILES = 10.004;
+const TODAY = new Date();
+
 const KEY_DATES = [
-  { title: '11+ registration opens', date: '2026-05-01', type: 'deadline' },
-  { title: '11+ registration closes', date: '2026-06-30', type: 'deadline' },
-  { title: 'Invitation packs begin', date: '2026-08-10', type: 'milestone' },
-  { title: 'Chase pack if not received', date: '2026-08-17', type: 'action' },
-  { title: '11+ exam month begins', date: '2026-09-01', type: 'exam' },
-  { title: 'CAF deadline', date: '2026-10-31', type: 'deadline' },
-  { title: 'National Offer Day', date: '2027-03-01', type: 'offer' },
-  { title: 'Target school start (Year 7)', date: '2027-09-01', type: 'start' },
+  { title: '11+ registration opens', date: '2026-05-07', critical: true, source: 'Warwickshire' },
+  { title: '11+ registration deadline', date: '2026-06-30', critical: true, source: 'Warwickshire' },
+  { title: 'Access arrangements deadline', date: '2026-06-30', critical: true, source: 'Warwickshire' },
+  { title: 'Access arrangements decisions (week commencing)', date: '2026-07-13', critical: false, source: 'Warwickshire' },
+  { title: 'Test invite letters (week commencing)', date: '2026-08-10', critical: false, source: 'Warwickshire' },
+  { title: '11+ test date 1', date: '2026-09-12', critical: true, source: 'Warwickshire' },
+  { title: '11+ test date 2', date: '2026-09-13', critical: true, source: 'Warwickshire' },
+  { title: 'Results available', date: '2026-10-16', critical: true, source: 'Warwickshire' },
+  { title: 'Residency evidence deadline (23:59)', date: '2026-12-31', critical: true, source: 'Lawrence Sheriff' },
+  { title: 'Year 7 starts', date: '2027-09-01', critical: false, source: 'School year' },
 ];
 
-const DASHBOARD_TARGETS = [
-  { id: 'exam', label: 'Exam Month Starts', date: '2026-09-01' },
-  { id: 'reg_close', label: 'Registration Closes', date: '2026-06-30' },
-  { id: 'caf', label: 'CAF Deadline', date: '2026-10-31' },
-  { id: 'offer', label: 'Offer Day', date: '2027-03-01' },
+const COUNTDOWN_TARGETS = [
+  { label: 'Registration deadline', date: '2026-06-30' },
+  { label: '11+ test date', date: '2026-09-12' },
+  { label: 'Results available', date: '2026-10-16' },
+  { label: 'Residency evidence deadline', date: '2026-12-31' },
 ];
 
 const STUDY_PLAN = [
-  { month: 'Month 1', items: ['Baseline assessment in English/VR, NVR, Maths', 'Create weekly timetable: 50% English/VR, 25% NVR, 25% Maths', 'Start vocabulary and comprehension log'] },
-  { month: 'Month 2', items: ['2 timed English/VR sets per week', '1 timed NVR set per week', '1 timed Maths set per week'] },
-  { month: 'Month 3', items: ['Increase mixed-topic timed sessions to 3 weekly', 'Review and patch weak topics from error log', 'Begin pressure practice (strict timings)'] },
-  { month: 'Month 4', items: ['Sit full-length mock every 2 weeks', 'Analyse mock performance by section weighting', 'Refine exam-day routine'] },
-  { month: 'Month 5', items: ['Weekly full mock under exam conditions', 'Focus on speed + accuracy drills', 'Consolidate high-yield topics'] },
-  { month: 'Month 6', items: ['Final revision cycle based on error patterns', 'Lighter workload week before test date', 'Pack exam essentials and route-check test centre'] },
+  'Set weekly routine (same days/times each week).',
+  'Complete 2 English/VR sessions.',
+  'Complete 1 NVR session.',
+  'Complete 1 Maths session.',
+  'Review mistakes and write 3 focus topics.',
+  'Run one timed mixed paper at the weekend.',
 ];
 
-const PRIORITY_RADIUS_MILES = 10.004;
-
-const POWER_MOVES = [
-  'Submit registration early and save proof immediately.',
-  'Track all admissions emails in one dedicated inbox label/folder.',
-  'Prepare proof-of-address documents in case you move into catchment.',
-  'Use weighted prep hours: 50% English/VR, 25% NVR, 25% Maths.',
-  'Build a shortlist of realistic backup schools before CAF submission.',
-  'Set price-drop and new-listing alerts on all three property portals.',
-  'Do test-centre dry run at school-run traffic time.',
-  'Maintain calm routine: sleep, nutrition, and light revision before exam.',
+const EVIDENCE_ITEMS = [
+  'House proof documents ready',
+  'Open day notes saved',
+  'Admissions call notes saved',
+  '11+ registration confirmation saved',
+  'Residency evidence checklist completed',
 ];
 
+const keyDatesList = document.getElementById('keyDatesList');
+const setupState = document.getElementById('setupState');
+const readinessBlock = document.getElementById('readinessBlock');
 const countdownCards = document.getElementById('countdownCards');
-const timeline = document.getElementById('timeline');
-const studyPlanEl = document.getElementById('studyPlan');
-const powerMovesEl = document.getElementById('powerMoves');
+const deadlineRisk = document.getElementById('deadlineRisk');
+const studyPlan = document.getElementById('studyPlan');
+const evidenceChecklist = document.getElementById('evidenceChecklist');
+const splitOutput = document.getElementById('splitOutput');
+
+const childName = document.getElementById('childName');
+const catchmentChecked = document.getElementById('catchmentChecked');
+const weeklyHours = document.getElementById('weeklyHours');
 const budgetSlider = document.getElementById('budgetSlider');
 const budgetOutput = document.getElementById('budgetOutput');
-const readinessScoreEl = document.getElementById('readinessScore');
-const readinessBarEl = document.getElementById('readinessBar');
-const riskStatusEl = document.getElementById('riskStatus');
-const riskBarEl = document.getElementById('riskBar');
-const weeklyHoursEl = document.getElementById('weeklyHours');
-const splitOutputEl = document.getElementById('splitOutput');
-const parentNotesEl = document.getElementById('parentNotes');
+const parentNotes = document.getElementById('parentNotes');
 
-function diffParts(targetDate) {
-  const now = new Date();
-  const target = new Date(`${targetDate}T00:00:00`);
-  const delta = target - now;
+function daysTo(dateStr) {
+  const target = new Date(`${dateStr}T00:00:00`);
+  return Math.ceil((target - TODAY) / (1000 * 60 * 60 * 24));
+}
 
-  if (delta <= 0) {
-    return { over: true, days: 0, hours: 0, minutes: 0 };
-  }
+function statusTag(date) {
+  const d = daysTo(date);
+  if (d < 0) return 'completed';
+  if (d <= 21) return 'upcoming';
+  return 'future';
+}
 
-  const days = Math.floor(delta / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((delta / (1000 * 60 * 60)) % 24);
-  const minutes = Math.floor((delta / (1000 * 60)) % 60);
-  return { over: false, days, hours, minutes };
+function renderKeyDates() {
+  keyDatesList.innerHTML = '';
+  KEY_DATES.forEach((item) => {
+    const status = statusTag(item.date);
+    const line = document.createElement('article');
+    line.className = `date-item ${status} ${item.critical ? 'critical' : ''}`;
+    line.innerHTML = `
+      <div>
+        <p class="date">${item.date}</p>
+        <h3>${item.title}</h3>
+        <p class="small">Source: ${item.source}</p>
+      </div>
+      <span class="pill">${status === 'completed' ? 'Completed' : status === 'upcoming' ? 'Upcoming' : 'Planned'}</span>
+    `;
+    keyDatesList.appendChild(line);
+  });
 }
 
 function renderCountdowns() {
   countdownCards.innerHTML = '';
-  DASHBOARD_TARGETS.forEach((target) => {
-    const t = diffParts(target.date);
+  COUNTDOWN_TARGETS.forEach((item) => {
+    const d = daysTo(item.date);
     const card = document.createElement('article');
     card.className = 'count-card';
-    card.innerHTML = t.over
-      ? `<h3>${target.label}</h3><p class="big">Completed</p><p>${target.date}</p>`
-      : `<h3>${target.label}</h3><p class="big">${t.days}d ${t.hours}h ${t.minutes}m</p><p>${target.date}</p>`;
+    card.innerHTML = `<h4>${item.label}</h4><p>${d < 0 ? 'Completed' : `${d} days`}</p><span>${item.date}</span>`;
     countdownCards.appendChild(card);
   });
 }
 
-function renderTimeline() {
-  timeline.innerHTML = '';
-  KEY_DATES
-    .slice()
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .forEach((event) => {
-      const item = document.createElement('div');
-      item.className = 'timeline-item';
-      item.innerHTML = `<span>${event.date}</span><strong>${event.title}</strong>`;
-      timeline.appendChild(item);
-    });
-}
-
-function renderChecklist(id, source, container) {
-  const state = JSON.parse(localStorage.getItem(id) || '{}');
+function renderChecklist(container, list, storageKey) {
+  const state = JSON.parse(localStorage.getItem(storageKey) || '{}');
   container.innerHTML = '';
-
-  source.forEach((entry, i) => {
-    if (typeof entry === 'string') {
-      const label = document.createElement('label');
-      label.className = `check-item ${state[i] ? 'done' : ''}`;
-      label.innerHTML = `<input type="checkbox" data-index="${i}" ${state[i] ? 'checked' : ''} /> ${entry}`;
-      container.appendChild(label);
-      return;
-    }
-
-    const group = document.createElement('div');
-    group.className = 'month-group';
-    group.innerHTML = `<h3>${entry.month}</h3>`;
-    entry.items.forEach((task, j) => {
-      const key = `${i}-${j}`;
-      const label = document.createElement('label');
-      label.className = `check-item ${state[key] ? 'done' : ''}`;
-      label.innerHTML = `<input type="checkbox" data-index="${key}" ${state[key] ? 'checked' : ''} /> ${task}`;
-      group.appendChild(label);
-    });
-    container.appendChild(group);
+  list.forEach((item, idx) => {
+    const label = document.createElement('label');
+    label.className = `check-item ${state[idx] ? 'done' : ''}`;
+    label.innerHTML = `<input type="checkbox" data-i="${idx}" ${state[idx] ? 'checked' : ''} /> ${item}`;
+    container.appendChild(label);
   });
 
-  container.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+  container.querySelectorAll('input').forEach((cb) => {
     cb.addEventListener('change', () => {
-      state[cb.dataset.index] = cb.checked;
-      localStorage.setItem(id, JSON.stringify(state));
-      renderChecklist(id, source, container);
-      computeReadiness();
+      state[cb.dataset.i] = cb.checked;
+      localStorage.setItem(storageKey, JSON.stringify(state));
+      renderChecklist(container, list, storageKey);
+      renderReadiness();
     });
   });
 }
 
-async function enableNotifications() {
-  if (!('Notification' in window)) {
-    alert('Notifications are not supported in this browser.');
+function renderSetupState() {
+  const setupDone = {
+    child: Boolean(childName.value.trim()),
+    catchment: catchmentChecked.checked,
+    hours: Number(weeklyHours.value) > 0,
+  };
+  const doneCount = Object.values(setupDone).filter(Boolean).length;
+
+  if (doneCount < 3) {
+    setupState.innerHTML = `
+      <p><strong>Complete these 3 steps to unlock your readiness score.</strong></p>
+      <ul>
+        <li>${setupDone.child ? '✅' : '⬜'} Add child details</li>
+        <li>${setupDone.catchment ? '✅' : '⬜'} Check catchment eligibility</li>
+        <li>${setupDone.hours ? '✅' : '⬜'} Set weekly revision hours</li>
+      </ul>
+    `;
+  } else {
+    setupState.innerHTML = '<p class="small">Setup complete. Your readiness score is now active.</p>';
+  }
+
+  localStorage.setItem('setup-state', JSON.stringify({
+    childName: childName.value,
+    catchmentChecked: catchmentChecked.checked,
+    weeklyHours: weeklyHours.value,
+  }));
+}
+
+function renderReadiness() {
+  const setupDone = Boolean(childName.value.trim()) && catchmentChecked.checked && Number(weeklyHours.value) > 0;
+  if (!setupDone) {
+    readinessBlock.innerHTML = '<p>Finish setup above to activate readiness insights.</p>';
     return;
   }
 
-  const permission = await Notification.requestPermission();
-  if (permission !== 'granted') {
-    alert('Notification access denied.');
-    return;
-  }
+  const studyState = JSON.parse(localStorage.getItem('study-plan') || '{}');
+  const evidenceState = JSON.parse(localStorage.getItem('evidence-checklist') || '{}');
+  const done = [...Object.values(studyState), ...Object.values(evidenceState)].filter(Boolean).length;
+  const total = STUDY_PLAN.length + EVIDENCE_ITEMS.length;
+  const score = Math.round((done / total) * 100);
 
-  const upcoming = KEY_DATES.filter((item) => {
-    const d = diffParts(item.date);
-    return !d.over && d.days <= 14;
-  });
+  const missing = [];
+  if (!Object.values(evidenceState).some(Boolean)) missing.push('Add at least one evidence item');
+  if (!Object.values(studyState).some(Boolean)) missing.push('Start this week\'s revision checklist');
 
-  if (upcoming.length === 0) {
-    new Notification('No key dates in the next 14 days', {
-      body: 'You are currently ahead of schedule.',
-    });
-    return;
-  }
+  const nextAction = missing[0] || 'Keep your weekly checklist momentum going.';
 
-  upcoming.forEach((item) => {
-    new Notification(`LSS deadline: ${item.title}`, {
-      body: `${item.date} is approaching soon.`,
-    });
+  readinessBlock.innerHTML = `
+    <p class="score">Readiness score: ${score}%</p>
+    <p>You’ve set a revision plan and checked key dates. Next: ${nextAction}</p>
+    <p class="small">Why it matters: completing evidence and revision steps reduces deadline risk.</p>
+  `;
+}
+
+function renderRevisionSplit() {
+  const total = Number(weeklyHours.value || 0);
+  splitOutput.textContent = `English/VR: ${(total * 0.5).toFixed(1)}h • NVR: ${(total * 0.25).toFixed(1)}h • Maths: ${(total * 0.25).toFixed(1)}h`;
+}
+
+function renderRisk() {
+  const urgent = KEY_DATES.filter((k) => {
+    const d = daysTo(k.date);
+    return d >= 0 && d <= 30;
+  }).length;
+  const label = urgent >= 3 ? 'Deadline Risk: High — focus on key dates this month.' : urgent >= 1 ? 'Deadline Risk: Medium — at least one major item is near.' : 'Deadline Risk: Low — no major deadlines this month.';
+  deadlineRisk.textContent = label;
+}
+
+function enableNotifications() {
+  if (!('Notification' in window)) return alert('Notifications are not supported in this browser.');
+  Notification.requestPermission().then((permission) => {
+    if (permission !== 'granted') return;
+    const next = KEY_DATES.find((k) => daysTo(k.date) >= 0);
+    if (next) {
+      new Notification(`Next key date: ${next.title}`, { body: `${next.date}` });
+    }
   });
 }
 
 function downloadICS() {
-  const events = KEY_DATES.map((item) => `BEGIN:VEVENT\nDTSTART;VALUE=DATE:${item.date.replaceAll('-', '')}\nSUMMARY:${item.title}\nEND:VEVENT`).join('\n');
-  const payload = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//LSS Mission Control//EN\n${events}\nEND:VCALENDAR`;
-  const blob = new Blob([payload], { type: 'text/calendar;charset=utf-8' });
+  const events = KEY_DATES.map((k) => `BEGIN:VEVENT\nDTSTART;VALUE=DATE:${k.date.replaceAll('-', '')}\nSUMMARY:${k.title}\nEND:VEVENT`).join('\n');
+  const text = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//LSS Planner//EN\n${events}\nEND:VCALENDAR`;
+  const blob = new Blob([text], { type: 'text/calendar;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'lss-key-dates.ics';
+  a.download = 'lss-2027-key-dates.ics';
   a.click();
   URL.revokeObjectURL(url);
 }
 
-function updateBudgetText() {
-  budgetOutput.textContent = `£${Number(budgetSlider.value).toLocaleString('en-GB')}`;
-}
-
-
-function computeReadiness() {
-  const studyState = JSON.parse(localStorage.getItem('study-plan-state') || '{}');
-  const movesState = JSON.parse(localStorage.getItem('power-moves-state') || '{}');
-
-  const totalStudyTasks = STUDY_PLAN.reduce((n, m) => n + m.items.length, 0);
-  const doneStudy = Object.values(studyState).filter(Boolean).length;
-  const doneMoves = Object.values(movesState).filter(Boolean).length;
-  const totalMoves = POWER_MOVES.length;
-
-  const readiness = Math.round(((doneStudy + doneMoves) / (totalStudyTasks + totalMoves)) * 100);
-  readinessScoreEl.textContent = `${Number.isFinite(readiness) ? readiness : 0}%`;
-  readinessBarEl.style.width = `${Number.isFinite(readiness) ? readiness : 0}%`;
-}
-
-function computeRisk() {
-  const upcoming = KEY_DATES
-    .map((d) => ({ ...d, diff: diffParts(d.date) }))
-    .filter((d) => !d.diff.over && d.diff.days <= 30);
-
-  let risk = 10;
-  if (upcoming.length >= 3) risk = 90;
-  else if (upcoming.length === 2) risk = 65;
-  else if (upcoming.length === 1) risk = 35;
-
-  riskBarEl.style.width = `${risk}%`;
-  riskStatusEl.textContent = risk >= 70 ? 'High' : risk >= 40 ? 'Medium' : 'Low';
-}
-
-function updateRevisionSplit() {
-  const total = Number(weeklyHoursEl.value || 0);
-  const evr = (total * 0.5).toFixed(1);
-  const nvr = (total * 0.25).toFixed(1);
-  const maths = (total * 0.25).toFixed(1);
-  splitOutputEl.textContent = `English/VR: ${evr}h • NVR: ${nvr}h • Maths: ${maths}h`;
-}
-
-function hydrateNotes() {
-  parentNotesEl.value = localStorage.getItem('parent-notes') || '';
-  parentNotesEl.addEventListener('input', () => {
-    localStorage.setItem('parent-notes', parentNotesEl.value);
+function initTabs() {
+  document.querySelectorAll('.tab').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+    });
   });
+}
+
+function updateBudgetOutput() {
+  budgetOutput.textContent = `£${Number(budgetSlider.value).toLocaleString('en-GB')}`;
 }
 
 function createListingLinks(e) {
   e.preventDefault();
   const area = encodeURIComponent(document.getElementById('area').value.trim());
+  const beds = document.getElementById('bedrooms').value || 3;
   const budget = budgetSlider.value;
-  const beds = document.getElementById('bedrooms').value || '3';
-
   const links = [
     { name: 'Rightmove', href: `https://www.rightmove.co.uk/property-for-sale/find.html?searchLocation=${area}&maxPrice=${budget}&minBedrooms=${beds}&radius=${PRIORITY_RADIUS_MILES}` },
     { name: 'Zoopla', href: `https://www.zoopla.co.uk/for-sale/property/${area}/?price_max=${budget}&beds_min=${beds}&radius=${PRIORITY_RADIUS_MILES}` },
     { name: 'OnTheMarket', href: `https://www.onthemarket.com/for-sale/property/${area}/?max-price=${budget}&min-bedrooms=${beds}&radius=${PRIORITY_RADIUS_MILES}` },
   ];
-
-  document.getElementById('listingLinks').innerHTML = links
-    .map((link) => `<a href="${link.href}" target="_blank" rel="noreferrer">Open ${link.name} search ↗</a>`)
-    .join('');
+  document.getElementById('listingLinks').innerHTML = links.map((l) => `<a href="${l.href}" target="_blank" rel="noreferrer">Open ${l.name}</a>`).join('');
 }
+
+function hydrateSavedSetup() {
+  const saved = JSON.parse(localStorage.getItem('setup-state') || '{}');
+  childName.value = saved.childName || '';
+  catchmentChecked.checked = Boolean(saved.catchmentChecked);
+  weeklyHours.value = saved.weeklyHours || 8;
+  parentNotes.value = localStorage.getItem('parent-notes') || '';
+}
+
+hydrateSavedSetup();
+renderKeyDates();
+renderCountdowns();
+renderChecklist(studyPlan, STUDY_PLAN, 'study-plan');
+renderChecklist(evidenceChecklist, EVIDENCE_ITEMS, 'evidence-checklist');
+renderSetupState();
+renderReadiness();
+renderRevisionSplit();
+renderRisk();
+initTabs();
+updateBudgetOutput();
+
+[childName, catchmentChecked, weeklyHours].forEach((el) => {
+  el.addEventListener('input', () => {
+    renderSetupState();
+    renderReadiness();
+    renderRevisionSplit();
+  });
+});
+
+parentNotes.addEventListener('input', () => localStorage.setItem('parent-notes', parentNotes.value));
+budgetSlider.addEventListener('input', updateBudgetOutput);
 
 document.getElementById('notifyBtn').addEventListener('click', enableNotifications);
 document.getElementById('calendarBtn').addEventListener('click', downloadICS);
 document.getElementById('listingForm').addEventListener('submit', createListingLinks);
-budgetSlider.addEventListener('input', updateBudgetText);
+document.getElementById('printStudyPlan').addEventListener('click', () => window.print());
 
-updateBudgetText();
-renderTimeline();
-renderCountdowns();
-renderChecklist('study-plan-state', STUDY_PLAN, studyPlanEl);
-renderChecklist('power-moves-state', POWER_MOVES, powerMovesEl);
-computeReadiness();
-computeRisk();
-updateRevisionSplit();
-hydrateNotes();
-weeklyHoursEl.addEventListener('input', updateRevisionSplit);
 setInterval(() => {
   renderCountdowns();
-  computeRisk();
+  renderRisk();
+  renderKeyDates();
 }, 60 * 1000);
