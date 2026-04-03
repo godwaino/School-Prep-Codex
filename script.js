@@ -59,6 +59,7 @@ function generateQuestions(subject, rows) {
     options: row.options,
     correctOptionIndex: row.answer,
     explanation: row.explanation,
+    topicTags: row.topicTags || [row.topic.toLowerCase().replace(/[^a-z0-9]+/g, '-')],
     modeTags: ['daily5', 'mini', 'timed'],
     active: true,
     media: row.media || null,
@@ -156,6 +157,49 @@ const QUESTION_BANK = [
   ]),
 ];
 
+function svgToDataUri(svg) {
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+const NVR_MEDIA_LIBRARY = {
+  'nvr-1': {
+    type: 'image',
+    alt: 'A 2x2 grid of squares with one shaded cell.',
+    src: svgToDataUri('<svg xmlns="http://www.w3.org/2000/svg" width="220" height="120"><rect width="220" height="120" fill="#f6f8ff"/><g transform="translate(55,20)" stroke="#2f3c6d" stroke-width="2"><rect x="0" y="0" width="40" height="40" fill="#4a56d9"/><rect x="40" y="0" width="40" height="40" fill="#fff"/><rect x="0" y="40" width="40" height="40" fill="#fff"/><rect x="40" y="40" width="40" height="40" fill="#fff"/></g></svg>'),
+  },
+  'nvr-2': {
+    type: 'image',
+    alt: 'Alternating up and down triangles in a row.',
+    src: svgToDataUri('<svg xmlns="http://www.w3.org/2000/svg" width="220" height="120"><rect width="220" height="120" fill="#f6f8ff"/><polygon points="30,70 50,35 70,70" fill="#4a56d9"/><polygon points="85,35 105,70 125,35" fill="#96a3ff"/><polygon points="140,70 160,35 180,70" fill="#4a56d9"/></svg>'),
+  },
+  'nvr-3': {
+    type: 'image',
+    alt: 'An isosceles triangle with a vertical dotted symmetry line.',
+    src: svgToDataUri('<svg xmlns="http://www.w3.org/2000/svg" width="220" height="120"><rect width="220" height="120" fill="#f6f8ff"/><polygon points="110,25 60,95 160,95" fill="#ffffff" stroke="#2f3c6d" stroke-width="3"/><line x1="110" y1="25" x2="110" y2="95" stroke="#4a56d9" stroke-width="2" stroke-dasharray="5,5"/></svg>'),
+  },
+  'nvr-4': {
+    type: 'image',
+    alt: 'Three symbol pairs where one pair is reversed.',
+    src: svgToDataUri('<svg xmlns="http://www.w3.org/2000/svg" width="220" height="120"><rect width="220" height="120" fill="#f6f8ff"/><text x="32" y="68" font-size="28">⚫⚪</text><text x="92" y="68" font-size="28">⚫⚪</text><text x="152" y="68" font-size="28">⚪⚫</text></svg>'),
+  },
+  'nvr-5': {
+    type: 'image',
+    alt: 'Right-pointing arrow and its mirror to the left.',
+    src: svgToDataUri('<svg xmlns="http://www.w3.org/2000/svg" width="220" height="120"><rect width="220" height="120" fill="#f6f8ff"/><polygon points="40,60 85,35 85,50 120,50 120,70 85,70 85,85" fill="#4a56d9"/><line x1="110" y1="20" x2="110" y2="100" stroke="#9aa4c7" stroke-dasharray="4,4"/><polygon points="180,60 135,35 135,50 100,50 100,70 135,70 135,85" fill="#96a3ff"/></svg>'),
+  },
+  'nvr-6': {
+    type: 'image',
+    alt: 'Dot groups increasing by two: 3, 5, 7.',
+    src: svgToDataUri('<svg xmlns="http://www.w3.org/2000/svg" width="220" height="120"><rect width="220" height="120" fill="#f6f8ff"/><g fill="#2f3c6d"><circle cx="28" cy="45" r="4"/><circle cx="40" cy="45" r="4"/><circle cx="52" cy="45" r="4"/><circle cx="84" cy="45" r="4"/><circle cx="96" cy="45" r="4"/><circle cx="108" cy="45" r="4"/><circle cx="90" cy="58" r="4"/><circle cx="102" cy="58" r="4"/><circle cx="144" cy="45" r="4"/><circle cx="156" cy="45" r="4"/><circle cx="168" cy="45" r="4"/><circle cx="150" cy="58" r="4"/><circle cx="162" cy="58" r="4"/><circle cx="174" cy="58" r="4"/><circle cx="156" cy="71" r="4"/></g></svg>'),
+  },
+};
+
+QUESTION_BANK.forEach((question) => {
+  if (question.subject === 'nvr' && NVR_MEDIA_LIBRARY[question.id]) {
+    question.media = NVR_MEDIA_LIBRARY[question.id];
+  }
+});
+
 const keyDatesListTab = document.getElementById('keyDatesListTab');
 const nextDeadlineCard = document.getElementById('nextDeadlineCard');
 const setupState = document.getElementById('setupState');
@@ -190,6 +234,7 @@ const EMPTY_PROGRESS = {
   questionsAttempted: 0,
   correctAnswers: 0,
   accuracyBySubject: {},
+  accuracyByTopic: {},
   streak: 0,
   weakestArea: 'Not enough data yet',
   strongestArea: 'Not enough data yet',
@@ -260,6 +305,17 @@ function getSubjectAttemptCount(subject) {
   return progress.accuracyBySubject[subject]?.attempted || 0;
 }
 
+function getWeakestTopic(subject) {
+  const progress = getProgressData();
+  const topicEntries = Object.entries(progress.accuracyByTopic || {})
+    .filter(([key, value]) => key.startsWith(`${subject}:`) && value.attempted >= 3)
+    .map(([key, value]) => ({ key, accuracy: value.correct / value.attempted }))
+    .sort((a, b) => a.accuracy - b.accuracy);
+
+  if (!topicEntries.length) return null;
+  return topicEntries[0].key.split(':')[1].replace(/-/g, ' ');
+}
+
 function getStudyPriorityWeights() {
   const total = Number(weeklyHours.value || 8);
   const mathsWeight = Math.max(1, Math.round(total * 0.3));
@@ -310,12 +366,35 @@ function getRecommendation() {
       ? `Recommended because ${SUBJECTS[top.subject]} has lower coverage so far.`
       : `Recommended because ${SUBJECTS[top.subject]} has had less recent practice.`;
 
-  return { subject: top.subject, reason, reasonChips };
+  const weakestTopic = getWeakestTopic(top.subject);
+  const reasonWithTopic = weakestTopic ? `${reason} Focus topic: ${weakestTopic}.` : reason;
+  return { subject: top.subject, reason: reasonWithTopic, reasonChips };
 }
 
 function pickQuestions({ subject = 'mixed', size = 5, mode = 'daily5' }) {
   const pool = QUESTION_BANK.filter((q) => q.active && q.modeTags.includes(mode) && (subject === 'mixed' ? true : q.subject === subject));
-  return [...pool].sort(() => Math.random() - 0.5).slice(0, Math.min(size, pool.length));
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  const groups = {
+    easy: shuffled.filter((q) => q.difficulty === 'easy'),
+    medium: shuffled.filter((q) => q.difficulty === 'medium'),
+    hard: shuffled.filter((q) => q.difficulty === 'hard'),
+  };
+
+  const targets = size <= 5
+    ? { easy: 2, medium: 2, hard: 1 }
+    : { easy: 3, medium: 5, hard: 2 };
+
+  const selected = [];
+  ['easy', 'medium', 'hard'].forEach((difficulty) => {
+    selected.push(...groups[difficulty].slice(0, targets[difficulty]));
+  });
+
+  if (selected.length < size) {
+    const alreadyIds = new Set(selected.map((q) => q.id));
+    selected.push(...shuffled.filter((q) => !alreadyIds.has(q.id)).slice(0, size - selected.length));
+  }
+
+  return selected.slice(0, Math.min(size, pool.length)).sort(() => Math.random() - 0.5);
 }
 
 function renderNextDeadline() {
@@ -648,6 +727,11 @@ function renderSubjectCards() {
 function renderPracticeProgress() {
   const progress = getProgressData();
   const avgAccuracy = progress.questionsAttempted ? Math.round((progress.correctAnswers / progress.questionsAttempted) * 100) : 0;
+  const weakestTopic = Object.entries(progress.accuracyByTopic || {})
+    .filter(([, value]) => value.attempted >= 3)
+    .map(([key, value]) => ({ key, accuracy: value.correct / value.attempted }))
+    .sort((a, b) => a.accuracy - b.accuracy)[0];
+  const weakestTopicLabel = weakestTopic ? weakestTopic.key.split(':')[1].replace(/-/g, ' ') : 'Not enough topic data yet';
   const emptyMessage = progress.sessions.length
     ? ''
     : '<p class="small">No practice sessions yet. Start with Daily 5 to build a calm routine.</p>';
@@ -661,6 +745,7 @@ function renderPracticeProgress() {
       <p><strong>${progress.streak}</strong><span>recent streak (days)</span></p>
     </div>
     <p class="small">Strongest: ${progress.strongestArea} • Weakest: ${progress.weakestArea}</p>
+    <p class="small">Topic to revisit: ${weakestTopicLabel}</p>
     <p class="small">Last practiced: ${progress.lastPracticedDate ? new Date(progress.lastPracticedDate).toLocaleDateString('en-GB') : 'Not yet'}</p>
   `;
 }
@@ -733,6 +818,9 @@ function renderPracticeQuestion() {
 
   const progressPct = Math.round(((currentPracticeSession.currentQuestionIndex + 1) / currentPracticeSession.questions.length) * 100);
   const selected = currentPracticeSession.answers.find((a) => a.questionId === q.id)?.selectedOptionIndex;
+  const mediaMarkup = q.media?.type === 'image'
+    ? `<figure class="question-media"><img src="${q.media.src}" alt="${q.media.alt || 'Question pattern'}" loading="lazy" decoding="async" /></figure>`
+    : '';
 
   practiceSession.innerHTML = `
     <div class="practice-sticky">
@@ -744,6 +832,7 @@ function renderPracticeQuestion() {
     <article class="question-card">
       <p class="small">${SUBJECTS[q.subject]} • ${q.topic} • ${q.difficulty}</p>
       <h4>${q.prompt}</h4>
+      ${mediaMarkup}
       <div class="option-grid" role="radiogroup" aria-label="Answer options">
         ${q.options.map((opt, idx) => `<button class="option-btn ${selected === idx ? 'selected' : ''}" data-opt="${idx}" role="radio" aria-checked="${selected === idx}" aria-label="Option ${String.fromCharCode(65 + idx)}: ${opt}">${String.fromCharCode(65 + idx)}. ${opt}</button>`).join('')}
       </div>
@@ -866,6 +955,16 @@ function finishPracticeSession() {
   progress.accuracyBySubject[currentPracticeSession.subject].attempted += total;
   progress.accuracyBySubject[currentPracticeSession.subject].correct += correct;
 
+  currentPracticeSession.questions.forEach((question) => {
+    const topicKey = `${question.subject}:${question.topicTags[0]}`;
+    if (!progress.accuracyByTopic[topicKey]) {
+      progress.accuracyByTopic[topicKey] = { attempted: 0, correct: 0 };
+    }
+    const answer = currentPracticeSession.answers.find((item) => item.questionId === question.id);
+    progress.accuracyByTopic[topicKey].attempted += 1;
+    if (answer?.correct) progress.accuracyByTopic[topicKey].correct += 1;
+  });
+
   updateStrongWeak(progress);
   saveProgressData(progress);
 
@@ -877,11 +976,12 @@ function finishPracticeSession() {
   const questionBreakdown = currentPracticeSession.questions.map((q) => {
     const answer = currentPracticeSession.answers.find((a) => a.questionId === q.id);
     const picked = answer ? q.options[answer.selectedOptionIndex] : 'No answer';
+    const coachExplanation = `Why: ${q.explanation}`;
     return `
       <li>
         <p><strong>${q.prompt}</strong></p>
         <p class="small">Your answer: ${picked} • Correct: ${q.options[q.correctOptionIndex]}</p>
-        <p class="small">${q.explanation}</p>
+        <p class="small">${coachExplanation}</p>
       </li>
     `;
   }).join('');

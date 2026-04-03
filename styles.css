@@ -899,6 +899,21 @@ textarea:focus-visible {
   padding: var(--space-4);
 }
 
+.question-media {
+  margin: 0.5rem 0 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #f9fbff;
+  padding: 0.45rem;
+}
+
+.question-media img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+}
+
 .option-grid {
   display: grid;
   gap: 0.5rem;
