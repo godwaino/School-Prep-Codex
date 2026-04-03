@@ -141,13 +141,15 @@
           <h3>Explore homes in catchment</h3>
           <p class="small">Property search supports planning, but admissions deadlines remain the priority.</p>
           <form id="listingForm" class="property-form">
-            <label>Area<input id="area" value="Rugby" required /></label>
+            <label>Area<input id="area" list="catchmentAreas" value="Rugby" required /></label>
+            <datalist id="catchmentAreas"></datalist>
             <label>Bedrooms<input id="bedrooms" type="number" value="3" min="1" max="8" /></label>
             <label>Budget cap<input id="budgetSlider" type="range" min="100000" max="1200000" step="5000" value="500000" /><output id="budgetOutput">£500,000</output></label>
+            <label class="check-inline"><input id="exactCatchmentMode" type="checkbox" checked />Use exact catchment radius (10.004 miles)</label>
             <button type="submit" class="btn-inline">Find listings</button>
           </form>
           <div id="listingLinks" class="listing-links"></div>
-          <p class="small">If a portal redirects, try a broader area name (for example Rugby or Warwickshire).</p>
+          <p id="propertyHint" class="small">Searches use 10.004-mile radius and Eastern Area place suggestions. Final eligibility is always determined by official admissions policy.</p>
         </section>
 
         <section id="tab-evidence" class="tab-panel" role="tabpanel">

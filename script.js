@@ -30,6 +30,11 @@ const STUDY_PLAN = [
   'Complete one timed mixed paper this week.',
 ];
 
+
+const EASTERN_AREA_PLACES = [
+  'Rugby','Dunchurch','Cawston','Thurlaston','Leamington Hastings','Birdingbury','Grandborough','Wolfhamcote','Willoughby','Binley Woods','Brinklow','Brandon and Bretford','Ryton-on-Dunsmore','Bubbenhall','Wolston','Church Lawford','Long Lawford','Stretton-on-Dunsmore','Princethorpe','Frankton','Marton','Bourton and Draycote','Churchover','Clifton-upon-Dunsmore','Combe Fields','Cosford','Easenhall','Harborough Magna','Kings Newnham','Little Lawford','Monks Kirby','Newton and Biggin','Pailton','Stretton-under-Fosse','Wibtoft','Willey','Withybrook'
+];
+
 const EVIDENCE_ITEMS = [
   'Proof of address documents ready',
   'Open day notes saved',
@@ -55,6 +60,8 @@ const weeklyHours = document.getElementById('weeklyHours');
 const budgetSlider = document.getElementById('budgetSlider');
 const budgetOutput = document.getElementById('budgetOutput');
 const parentNotes = document.getElementById('parentNotes');
+const exactCatchmentMode = document.getElementById('exactCatchmentMode');
+const propertyHint = document.getElementById('propertyHint');
 
 function formatDateUK(dateStr) {
   return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(`${dateStr}T00:00:00`));
@@ -265,21 +272,39 @@ function createListingLinks(e) {
   const areaSlug = areaRaw.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
   const beds = document.getElementById('bedrooms').value || 3;
   const budget = budgetSlider.value;
+  const radius = exactCatchmentMode?.checked ? PRIORITY_RADIUS_MILES : 15;
+
+  if (propertyHint) {
+    const inEasternList = EASTERN_AREA_PLACES.map((x) => x.toLowerCase()).includes(areaRaw.toLowerCase());
+    propertyHint.textContent = exactCatchmentMode?.checked
+      ? inEasternList
+        ? 'Exact mode active: using 10.004-mile radius and an Eastern Area place.'
+        : 'Exact mode active with 10.004-mile radius. Consider selecting an Eastern Area place for better precision.'
+      : 'Broader search mode active. Switch exact mode on to match the 10.004-mile priority circle.';
+  }
+
   const links = [
     {
       name: 'Rightmove',
-      href: `https://www.rightmove.co.uk/property-for-sale/find.html?keywords=${area}&maxPrice=${budget}&minBedrooms=${beds}&radius=${PRIORITY_RADIUS_MILES}`,
+      href: `https://www.rightmove.co.uk/property-for-sale/find.html?keywords=${area}&maxPrice=${budget}&minBedrooms=${beds}&radius=${radius}`,
     },
     {
       name: 'Zoopla',
-      href: `https://www.zoopla.co.uk/for-sale/property/${areaSlug}/?price_max=${budget}&beds_min=${beds}&radius=${PRIORITY_RADIUS_MILES}`,
+      href: `https://www.zoopla.co.uk/for-sale/property/${areaSlug}/?price_max=${budget}&beds_min=${beds}&radius=${radius}`,
     },
     {
       name: 'OnTheMarket',
-      href: `https://www.onthemarket.com/for-sale/property/${areaSlug}/?max-price=${budget}&min-bedrooms=${beds}&radius=${PRIORITY_RADIUS_MILES}`,
+      href: `https://www.onthemarket.com/for-sale/property/${areaSlug}/?max-price=${budget}&min-bedrooms=${beds}&radius=${radius}`,
     },
   ];
   document.getElementById('listingLinks').innerHTML = links.map((l) => `<a href="${l.href}" target="_blank" rel="noreferrer">Open ${l.name}</a>`).join('');
+}
+
+
+function populateCatchmentDatalist() {
+  const datalist = document.getElementById('catchmentAreas');
+  if (!datalist) return;
+  datalist.innerHTML = EASTERN_AREA_PLACES.map((p) => `<option value="${p}"></option>`).join('');
 }
 
 function hydrateSavedSetup() {
@@ -291,6 +316,7 @@ function hydrateSavedSetup() {
 }
 
 hydrateSavedSetup();
+populateCatchmentDatalist();
 renderNextDeadline();
 renderKeyDates();
 renderCountdowns();
