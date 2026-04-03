@@ -260,9 +260,7 @@ h1 {
 }
 
 .sticky-card {
-  position: sticky;
-  top: 0;
-  z-index: 4;
+  /* sticky removed — it covered the workspace tabs below it */
 }
 
 /* ── Typography ── */
@@ -765,10 +763,6 @@ textarea:focus-visible {
   .btn-inline {
     width: 100%;
     text-align: center;
-  }
-
-  .sticky-card {
-    position: static;
   }
 
   .next-deadline-wrap {
