@@ -259,9 +259,6 @@ h1 {
   box-shadow: var(--shadow-sm);
 }
 
-.sticky-card {
-  /* sticky removed — it covered the workspace tabs below it */
-}
 
 /* ── Typography ── */
 
