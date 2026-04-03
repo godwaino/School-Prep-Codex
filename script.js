@@ -598,8 +598,12 @@ function renderSubjectCards() {
 function renderPracticeProgress() {
   const progress = getProgressData();
   const avgAccuracy = progress.questionsAttempted ? Math.round((progress.correctAnswers / progress.questionsAttempted) * 100) : 0;
+  const emptyMessage = progress.sessions.length
+    ? ''
+    : '<p class="small">No practice sessions yet. Start with Daily 5 to build a calm routine.</p>';
   practiceProgress.innerHTML = `
     <h4>Recent progress</h4>
+    ${emptyMessage}
     <div class="progress-metrics">
       <p><strong>${progress.sessions.length}</strong><span>sessions completed</span></p>
       <p><strong>${progress.questionsAttempted}</strong><span>questions attempted</span></p>
@@ -619,6 +623,12 @@ function getModeConfig(mode, subject) {
 }
 
 function startPracticeSession(mode, subject = 'mixed') {
+  if (currentPracticeSession) {
+    const confirmed = window.confirm('You already have a practice session in progress. Start a new session and lose current progress?');
+    if (!confirmed) return;
+    clearInterval(currentPracticeSession.timerHandle);
+  }
+
   const config = getModeConfig(mode, subject);
   const questions = pickQuestions({ subject: config.subject, size: config.size, mode: mode === 'mini' ? 'mini' : mode === 'timed' ? 'timed' : 'daily5' });
   const feedbackMode = mode === 'daily5' ? 'instant' : 'end';
@@ -678,20 +688,21 @@ function renderPracticeQuestion() {
     <div class="practice-sticky">
       <p><strong>${currentPracticeSession.title}</strong> • ${SUBJECTS[currentPracticeSession.subject] || 'Mixed'}</p>
       <p>Question ${currentPracticeSession.currentQuestionIndex + 1} of ${currentPracticeSession.questions.length}</p>
-      ${currentPracticeSession.timeLimitSeconds > 0 ? `<p>Time left: <strong id="practiceTimer"></strong></p>` : ''}
+      ${currentPracticeSession.timeLimitSeconds > 0 ? `<p aria-live="polite">Time left: <strong id="practiceTimer"></strong></p>` : ''}
       <div class="progress-bar"><div class="progress-fill" style="width:${progressPct}%"></div></div>
     </div>
     <article class="question-card">
       <p class="small">${SUBJECTS[q.subject]} • ${q.topic} • ${q.difficulty}</p>
       <h4>${q.prompt}</h4>
-      <div class="option-grid">
-        ${q.options.map((opt, idx) => `<button class="option-btn ${selected === idx ? 'selected' : ''}" data-opt="${idx}">${String.fromCharCode(65 + idx)}. ${opt}</button>`).join('')}
+      <div class="option-grid" role="radiogroup" aria-label="Answer options">
+        ${q.options.map((opt, idx) => `<button class="option-btn ${selected === idx ? 'selected' : ''}" data-opt="${idx}" role="radio" aria-checked="${selected === idx}" aria-label="Option ${String.fromCharCode(65 + idx)}: ${opt}">${String.fromCharCode(65 + idx)}. ${opt}</button>`).join('')}
       </div>
       <div class="question-actions">
         <label class="check-inline"><input id="instantFeedbackToggle" type="checkbox" ${currentPracticeSession.feedbackMode === 'instant' ? 'checked' : ''}/> Instant feedback</label>
         <button id="nextQuestionBtn" class="btn-inline" ${selected === undefined ? 'disabled' : ''}>${currentPracticeSession.currentQuestionIndex === currentPracticeSession.questions.length - 1 ? 'Finish' : 'Next'}</button>
+        <button id="quitSessionBtn" class="btn-inline btn-quiet" type="button">Quit session</button>
       </div>
-      <p id="instantFeedback" class="small"></p>
+      <p id="instantFeedback" class="small" aria-live="polite"></p>
     </article>
   `;
 
@@ -724,6 +735,14 @@ function renderPracticeQuestion() {
 
   document.getElementById('instantFeedbackToggle')?.addEventListener('change', (e) => {
     currentPracticeSession.feedbackMode = e.target.checked ? 'instant' : 'end';
+  });
+
+  document.getElementById('quitSessionBtn')?.addEventListener('click', () => {
+    const confirmed = window.confirm('Quit this session? Your current answers will not be saved.');
+    if (!confirmed) return;
+    clearInterval(currentPracticeSession?.timerHandle);
+    currentPracticeSession = null;
+    practiceSession.innerHTML = '<p class="small">Session ended. You can start another short drill whenever you are ready.</p>';
   });
 }
 
@@ -772,6 +791,7 @@ function finishPracticeSession() {
 
   const total = currentPracticeSession.questions.length;
   const correct = currentPracticeSession.answers.filter((a) => a.correct).length;
+  const unanswered = total - currentPracticeSession.answers.length;
   const timeTakenSeconds = Math.round((Date.now() - currentPracticeSession.startedAt) / 1000);
   const progress = getProgressData();
 
@@ -819,6 +839,7 @@ function finishPracticeSession() {
   practiceResults.innerHTML = `
     <h4>Session results</h4>
     <p><strong>Score:</strong> ${correct}/${total}</p>
+    <p><strong>Unanswered:</strong> ${unanswered}</p>
     <p><strong>Time taken:</strong> ${Math.floor(timeTakenSeconds / 60)}m ${timeTakenSeconds % 60}s</p>
     <p><strong>Areas attempted:</strong> ${SUBJECTS[currentPracticeSession.subject]}</p>
     <p><strong>Recommended next step:</strong> ${recommendation}</p>

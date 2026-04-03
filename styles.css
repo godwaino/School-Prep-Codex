@@ -165,6 +165,17 @@ h1 {
   box-shadow: var(--shadow-sm);
 }
 
+.btn-quiet {
+  background: #fff;
+  border-color: var(--border-strong);
+  color: var(--text-strong);
+}
+
+.btn-quiet:hover {
+  background: #f4f7ff;
+  box-shadow: none;
+}
+
 /* ── Trust strip ── */
 
 .trust-strip {
