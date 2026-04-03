@@ -25,6 +25,8 @@ const STUDY_PLAN = [
   { month: 'Month 6', items: ['Final revision cycle based on error patterns', 'Lighter workload week before test date', 'Pack exam essentials and route-check test centre'] },
 ];
 
+const PRIORITY_RADIUS_MILES = 10.004;
+
 const POWER_MOVES = [
   'Submit registration early and save proof immediately.',
   'Track all admissions emails in one dedicated inbox label/folder.',
@@ -173,9 +175,9 @@ function createListingLinks(e) {
   const beds = document.getElementById('bedrooms').value || '3';
 
   const links = [
-    { name: 'Rightmove', href: `https://www.rightmove.co.uk/property-for-sale/find.html?searchLocation=${area}&maxPrice=${budget}&minBedrooms=${beds}` },
-    { name: 'Zoopla', href: `https://www.zoopla.co.uk/for-sale/property/${area}/?price_max=${budget}&beds_min=${beds}` },
-    { name: 'OnTheMarket', href: `https://www.onthemarket.com/for-sale/property/${area}/?max-price=${budget}&min-bedrooms=${beds}` },
+    { name: 'Rightmove', href: `https://www.rightmove.co.uk/property-for-sale/find.html?searchLocation=${area}&maxPrice=${budget}&minBedrooms=${beds}&radius=${PRIORITY_RADIUS_MILES}` },
+    { name: 'Zoopla', href: `https://www.zoopla.co.uk/for-sale/property/${area}/?price_max=${budget}&beds_min=${beds}&radius=${PRIORITY_RADIUS_MILES}` },
+    { name: 'OnTheMarket', href: `https://www.onthemarket.com/for-sale/property/${area}/?max-price=${budget}&min-bedrooms=${beds}&radius=${PRIORITY_RADIUS_MILES}` },
   ];
 
   document.getElementById('listingLinks').innerHTML = links

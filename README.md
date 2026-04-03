@@ -16,6 +16,7 @@ A focused web app for families preparing for Lawrence Sheriff School Year 7 entr
   - 25% Maths
 - 6-month interactive study plan checklist persisted in `localStorage`.
 - Catchment/property search helper with budget slider and links to Rightmove, Zoopla, and OnTheMarket.
+- Exact catchment reference section including the full Eastern Area parish list and Priority Circle rule (10.004 miles from Rugby Water Tower).
 - "Power Moves" section with 8 strategic tips.
 - Browser notifications for imminent deadlines.
 - Calendar export for all key dates (`.ics`).
