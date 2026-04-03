@@ -44,6 +44,13 @@ const studyPlanEl = document.getElementById('studyPlan');
 const powerMovesEl = document.getElementById('powerMoves');
 const budgetSlider = document.getElementById('budgetSlider');
 const budgetOutput = document.getElementById('budgetOutput');
+const readinessScoreEl = document.getElementById('readinessScore');
+const readinessBarEl = document.getElementById('readinessBar');
+const riskStatusEl = document.getElementById('riskStatus');
+const riskBarEl = document.getElementById('riskBar');
+const weeklyHoursEl = document.getElementById('weeklyHours');
+const splitOutputEl = document.getElementById('splitOutput');
+const parentNotesEl = document.getElementById('parentNotes');
 
 function diffParts(targetDate) {
   const now = new Date();
@@ -117,6 +124,7 @@ function renderChecklist(id, source, container) {
       state[cb.dataset.index] = cb.checked;
       localStorage.setItem(id, JSON.stringify(state));
       renderChecklist(id, source, container);
+      computeReadiness();
     });
   });
 }
@@ -168,6 +176,50 @@ function updateBudgetText() {
   budgetOutput.textContent = `£${Number(budgetSlider.value).toLocaleString('en-GB')}`;
 }
 
+
+function computeReadiness() {
+  const studyState = JSON.parse(localStorage.getItem('study-plan-state') || '{}');
+  const movesState = JSON.parse(localStorage.getItem('power-moves-state') || '{}');
+
+  const totalStudyTasks = STUDY_PLAN.reduce((n, m) => n + m.items.length, 0);
+  const doneStudy = Object.values(studyState).filter(Boolean).length;
+  const doneMoves = Object.values(movesState).filter(Boolean).length;
+  const totalMoves = POWER_MOVES.length;
+
+  const readiness = Math.round(((doneStudy + doneMoves) / (totalStudyTasks + totalMoves)) * 100);
+  readinessScoreEl.textContent = `${Number.isFinite(readiness) ? readiness : 0}%`;
+  readinessBarEl.style.width = `${Number.isFinite(readiness) ? readiness : 0}%`;
+}
+
+function computeRisk() {
+  const upcoming = KEY_DATES
+    .map((d) => ({ ...d, diff: diffParts(d.date) }))
+    .filter((d) => !d.diff.over && d.diff.days <= 30);
+
+  let risk = 10;
+  if (upcoming.length >= 3) risk = 90;
+  else if (upcoming.length === 2) risk = 65;
+  else if (upcoming.length === 1) risk = 35;
+
+  riskBarEl.style.width = `${risk}%`;
+  riskStatusEl.textContent = risk >= 70 ? 'High' : risk >= 40 ? 'Medium' : 'Low';
+}
+
+function updateRevisionSplit() {
+  const total = Number(weeklyHoursEl.value || 0);
+  const evr = (total * 0.5).toFixed(1);
+  const nvr = (total * 0.25).toFixed(1);
+  const maths = (total * 0.25).toFixed(1);
+  splitOutputEl.textContent = `English/VR: ${evr}h • NVR: ${nvr}h • Maths: ${maths}h`;
+}
+
+function hydrateNotes() {
+  parentNotesEl.value = localStorage.getItem('parent-notes') || '';
+  parentNotesEl.addEventListener('input', () => {
+    localStorage.setItem('parent-notes', parentNotesEl.value);
+  });
+}
+
 function createListingLinks(e) {
   e.preventDefault();
   const area = encodeURIComponent(document.getElementById('area').value.trim());
@@ -195,4 +247,12 @@ renderTimeline();
 renderCountdowns();
 renderChecklist('study-plan-state', STUDY_PLAN, studyPlanEl);
 renderChecklist('power-moves-state', POWER_MOVES, powerMovesEl);
-setInterval(renderCountdowns, 60 * 1000);
+computeReadiness();
+computeRisk();
+updateRevisionSplit();
+hydrateNotes();
+weeklyHoursEl.addEventListener('input', updateRevisionSplit);
+setInterval(() => {
+  renderCountdowns();
+  computeRisk();
+}, 60 * 1000);
