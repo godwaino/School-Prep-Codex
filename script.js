@@ -121,9 +121,11 @@ function renderCountdowns() {
   countdownCards.innerHTML = '';
   COUNTDOWN_TARGETS.forEach((item) => {
     const d = daysTo(item.date);
+    const urgency = d < 0 ? 'completed' : d <= 14 ? 'urgent' : d <= 60 ? 'soon' : '';
     const card = document.createElement('article');
-    card.className = 'count-card';
-    card.innerHTML = `<h4>${item.label}</h4><p>${d < 0 ? 'Completed' : `${d} days`}</p><span>${formatDateUK(item.date)}</span>`;
+    card.className = `count-card ${urgency}`.trim();
+    const dayLabel = d < 0 ? 'done' : d === 1 ? 'day' : 'days';
+    card.innerHTML = `<h4>${item.label}</h4><p>${d < 0 ? '✓' : d}</p><span>${d >= 0 ? `${dayLabel} · ` : ''}${formatDateUK(item.date)}</span>`;
     countdownCards.appendChild(card);
   });
 }
@@ -197,11 +199,18 @@ function renderReadiness() {
     ? 'Next, confirm catchment and save proof of address notes.'
     : 'Next, keep your weekly revision checklist consistent.';
 
+  const badge = score < 40 ? 'Getting started' : score < 75 ? 'Making progress' : 'Strong position';
   readinessBlock.innerHTML = `
-    <p class="score">Readiness score: ${score}%</p>
+    <div class="readiness-header">
+      <p class="score">Readiness: ${score}%</p>
+      <span class="readiness-badge">${badge}</span>
+    </div>
+    <div class="progress-bar" role="progressbar" aria-valuenow="${score}" aria-valuemin="0" aria-valuemax="100">
+      <div class="progress-fill" style="width: ${score}%"></div>
+    </div>
     <p>${encouragement}</p>
     <p>${nextAction}</p>
-    <p class="small">Deadline Risk support: stay on top of upcoming key dates and evidence tasks.</p>
+    <p class="small">Deadline Risk: stay on top of upcoming key dates and evidence tasks.</p>
   `;
 }
 
