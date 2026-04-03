@@ -3,86 +3,84 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LSS 2027 Admission Planner</title>
+    <title>LSS 2027 Admissions Mission Control</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <main class="container">
-      <header>
-        <h1>Lawrence Sheriff School 2027 Planner</h1>
+      <header class="hero card">
+        <h1>Lawrence Sheriff School — Mission Control (2027 Entry)</h1>
         <p>
-          A practical command centre for 11+ prep, admissions deadlines, and
-          catchment-area move decisions.
+          Plan for Year 7 admission in <strong>September 2027</strong> with a
+          live deadline dashboard, exam prep plan, and catchment move support.
         </p>
       </header>
 
       <section class="card">
-        <h2>Your Strategy Snapshot</h2>
-        <ul>
-          <li><strong>Target intake:</strong> September 2027</li>
-          <li><strong>11+ exam window:</strong> September 2026</li>
-          <li><strong>Current status:</strong> Outside catchment (editable in checklist below)</li>
-        </ul>
-      </section>
-
-      <section class="card">
-        <h2>Official Timeline & Deadline Alerts</h2>
-        <p>
-          Dates below are taken from the Lawrence Sheriff School Admissions
-          Policy 2027–2028 and turned into reminders.
-        </p>
-        <div class="actions">
+        <div class="section-head">
+          <h2>Live Countdown Dashboard</h2>
           <button id="notifyBtn">Enable browser notifications</button>
-          <button id="calendarBtn">Download calendar (.ics)</button>
         </div>
-        <div id="deadlineList" class="deadline-list"></div>
+        <div id="countdownCards" class="countdown-grid"></div>
       </section>
 
       <section class="card">
-        <h2>Power Moves (High-Impact Actions)</h2>
-        <div id="powerMoves" class="checklist"></div>
+        <div class="section-head">
+          <h2>Visual Timeline: 2026 → September 2027</h2>
+          <button id="calendarBtn">Download all dates (.ics)</button>
+        </div>
+        <div id="timeline" class="timeline"></div>
       </section>
 
       <section class="card">
-        <h2>Catchment Move Decision Tool</h2>
+        <h2>11+ Exam Guide (Warwickshire Grammar Format)</h2>
+        <div class="weighting-grid">
+          <article>
+            <h3>English / Verbal Reasoning</h3>
+            <p class="big">50%</p>
+          </article>
+          <article>
+            <h3>Non-Verbal Reasoning</h3>
+            <p class="big">25%</p>
+          </article>
+          <article>
+            <h3>Maths</h3>
+            <p class="big">25%</p>
+          </article>
+        </div>
+        <p class="small">Use weighting to allocate weekly study time in the same proportions.</p>
+      </section>
+
+      <section class="card">
+        <h2>6-Month Study Plan (Interactive)</h2>
+        <p class="small">Tick off actions as you complete them. Progress is saved on this device.</p>
+        <div id="studyPlan" class="checklist"></div>
+      </section>
+
+      <section class="card">
+        <h2>Catchment & Property Search Tool</h2>
         <form id="listingForm" class="grid-form">
           <label>
-            Target area / town
+            Search area
             <input id="area" value="Rugby" required />
           </label>
           <label>
-            Max budget (£)
-            <input id="maxBudget" type="number" value="500000" min="50000" step="5000" required />
-          </label>
-          <label>
-            Min budget (£)
-            <input id="minBudget" type="number" value="300000" min="0" step="5000" />
-          </label>
-          <label>
-            Bedrooms (minimum)
+            Minimum bedrooms
             <input id="bedrooms" type="number" value="3" min="1" max="8" />
           </label>
           <label>
-            Radius from Rugby Water Tower (miles)
-            <input id="radius" type="number" value="10" min="1" max="25" />
+            Budget cap (£)
+            <input id="budgetSlider" type="range" min="100000" max="1200000" step="5000" value="500000" />
+            <output id="budgetOutput">£500,000</output>
           </label>
-          <button type="submit">Find live listings</button>
+          <button type="submit">Build live listing links</button>
         </form>
-
         <div id="listingLinks" class="listing-links"></div>
-        <p class="small">
-          Tip: Save searches and activate email alerts in each portal so you are
-          notified when suitable homes appear.
-        </p>
       </section>
 
       <section class="card">
-        <h2>Prep Resources</h2>
-        <ul>
-          <li><a href="https://www.lawrencesheriffschool.net/admissions/admissions-policy" target="_blank" rel="noreferrer">Lawrence Sheriff admissions policies</a></li>
-          <li><a href="https://www.warwickshire.gov.uk/grammar-schools-11-test" target="_blank" rel="noreferrer">Warwickshire 11+ registration/test process</a></li>
-          <li><a href="https://www.atomlearning.com/blog/west-midlands-grammar-schools-11-plus" target="_blank" rel="noreferrer">Atom guide to West Midlands grammar school 11+</a></li>
-        </ul>
+        <h2>Power Moves (8)</h2>
+        <div id="powerMoves" class="checklist"></div>
       </section>
     </main>
 

@@ -1,18 +1,25 @@
-# Lawrence Sheriff School 2027 Admission Planner
+# Lawrence Sheriff School 2027 Admissions Mission Control
 
-A lightweight web app to support a family preparing for Lawrence Sheriff School (Year 7 entry in September 2027), including:
+A focused web app for families preparing for Lawrence Sheriff School Year 7 entry (September 2027).
 
-- Timeline of key admissions deadlines.
-- Browser notification nudges for upcoming dates.
-- One-click calendar export (`.ics`).
-- Checklist of high-impact "power moves".
-- Live property listing search links (Rightmove, OnTheMarket, Zoopla) with your budget filters.
+## Features
 
-## Run locally
+- Live countdown dashboard for:
+  - 11+ exam month start
+  - registration close
+  - CAF deadline
+  - National Offer Day
+- Visual timeline of key dates through September 2027.
+- 11+ exam weighting guide:
+  - 50% English/VR
+  - 25% NVR
+  - 25% Maths
+- 6-month interactive study plan checklist persisted in `localStorage`.
+- Catchment/property search helper with budget slider and links to Rightmove, Zoopla, and OnTheMarket.
+- "Power Moves" section with 8 strategic tips.
+- Browser notifications for imminent deadlines.
+- Calendar export for all key dates (`.ics`).
+
+## Run
 
 Open `index.html` in a browser.
-
-## Notes
-
-- Deadline dates are preloaded based on the Lawrence Sheriff School Admissions Policy 2027–2028.
-- Property portals can change URL structures over time, but this app builds direct filtered search URLs using your inputs.
