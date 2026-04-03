@@ -459,7 +459,8 @@ textarea:focus {
   align-items: center;
 }
 
-.check-inline input {
+.check-inline input,
+.check-item input[type="checkbox"] {
   width: auto;
 }
 
