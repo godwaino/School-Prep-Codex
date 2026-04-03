@@ -76,6 +76,7 @@
           <label class="check-inline"><input id="catchmentChecked" type="checkbox" />I have checked catchment eligibility</label>
           <label>Set weekly revision hours<input id="weeklyHours" type="number" min="1" max="40" value="8" /></label>
         </div>
+        <div id="practiceNextAction" class="inline-note"></div>
       </section>
 
       <section id="readiness-section" class="card">
@@ -92,6 +93,7 @@
           <button class="tab" data-tab="catchment" role="tab">Catchment</button>
           <button class="tab" data-tab="property" role="tab">Property</button>
           <button class="tab" data-tab="evidence" role="tab">Evidence</button>
+          <button class="tab" data-tab="practice" role="tab">Practice</button>
         </div>
 
 
@@ -108,12 +110,18 @@
           <h3>Admissions Dashboard</h3>
           <div id="countdownCards" class="countdown-grid"></div>
           <div class="inline-note" id="deadlineRisk"></div>
+          <article class="today-practice" id="todayPracticeCard"></article>
           <button id="notifyBtn" class="btn-inline">Enable browser reminders</button>
         </section>
 
         <section id="tab-study" class="tab-panel" role="tabpanel">
           <h3>Suggested weekly revision split</h3>
           <p id="splitOutput" class="small"></p>
+          <p id="practiceSplitOutput" class="small"></p>
+          <section class="card-lite">
+            <h4>Practice actions for this week</h4>
+            <div id="practiceActionList" class="checklist"></div>
+          </section>
           <div id="studyPlan" class="checklist"></div>
           <button id="printStudyPlan" class="btn-inline">Print study checklist</button>
         </section>
@@ -155,6 +163,32 @@
           <div id="evidenceChecklist" class="checklist"></div>
           <textarea id="parentNotes" rows="8" placeholder="Proof of address, open day notes, admissions call notes, test registration confirmations..."></textarea>
         </section>
+
+        <section id="tab-practice" class="tab-panel" role="tabpanel">
+          <div class="practice-hero card-lite">
+            <h3>Build confidence with short 11+ style practice</h3>
+            <p class="small">Practice in the style of the Warwickshire 11+. Short familiarisation drills for English, Verbal Reasoning, Non-Verbal Reasoning, and Maths.</p>
+            <div class="practice-mode-buttons">
+              <button class="btn-inline" data-start-mode="daily5">Daily 5</button>
+              <button class="btn-inline" data-start-mode="mini">Mini Quiz</button>
+              <button class="btn-inline" data-start-mode="timed">Timed Drill</button>
+            </div>
+          </div>
+
+          <article id="recommendedPractice" class="card-lite"></article>
+
+          <section class="subject-grid" id="subjectCards"></section>
+
+          <section class="card-lite" id="practiceProgress"></section>
+
+          <section class="card-lite practice-helpful-note">
+            <p class="small">This practice area is designed to support familiarisation with the Warwickshire 11+ question style. Always refer to official admissions and familiarisation information for the latest details.</p>
+            <p class="small">Use alongside official familiarisation materials and school guidance.</p>
+          </section>
+
+          <section id="practiceSession" class="card-lite"></section>
+          <section id="practiceResults" class="card-lite"></section>
+        </section>
       </section>
 
       <footer class="card footer-sources">
@@ -162,6 +196,8 @@
         <ul>
           <li><a href="https://www.lawrencesheriffschool.net/admissions/admissions-policy" target="_blank" rel="noreferrer">Lawrence Sheriff School admissions policy</a></li>
           <li><a href="https://www.warwickshire.gov.uk/grammar-schools-11-test" target="_blank" rel="noreferrer">Warwickshire grammar school 11+ process</a></li>
+          <li><a href="https://westmidlandsgrammarschools.co.uk/the-entrance-test" target="_blank" rel="noreferrer">West Midlands Grammar Schools entrance test information</a></li>
+          <li><a href="https://www.atomlearning.com/blog/lawrence-sheriff-school-11-plus" target="_blank" rel="noreferrer">Lawrence Sheriff 11+ background (practice-style reference)</a></li>
         </ul>
       </footer>
     </main>
