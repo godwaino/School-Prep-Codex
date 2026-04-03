@@ -260,13 +260,24 @@ function updateBudgetOutput() {
 
 function createListingLinks(e) {
   e.preventDefault();
-  const area = encodeURIComponent(document.getElementById('area').value.trim());
+  const areaRaw = document.getElementById('area').value.trim();
+  const area = encodeURIComponent(areaRaw);
+  const areaSlug = areaRaw.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
   const beds = document.getElementById('bedrooms').value || 3;
   const budget = budgetSlider.value;
   const links = [
-    { name: 'Rightmove', href: `https://www.rightmove.co.uk/property-for-sale/find.html?searchLocation=${area}&maxPrice=${budget}&minBedrooms=${beds}&radius=${PRIORITY_RADIUS_MILES}` },
-    { name: 'Zoopla', href: `https://www.zoopla.co.uk/for-sale/property/${area}/?price_max=${budget}&beds_min=${beds}&radius=${PRIORITY_RADIUS_MILES}` },
-    { name: 'OnTheMarket', href: `https://www.onthemarket.com/for-sale/property/${area}/?max-price=${budget}&min-bedrooms=${beds}&radius=${PRIORITY_RADIUS_MILES}` },
+    {
+      name: 'Rightmove',
+      href: `https://www.rightmove.co.uk/property-for-sale/find.html?keywords=${area}&maxPrice=${budget}&minBedrooms=${beds}&radius=${PRIORITY_RADIUS_MILES}`,
+    },
+    {
+      name: 'Zoopla',
+      href: `https://www.zoopla.co.uk/for-sale/property/${areaSlug}/?price_max=${budget}&beds_min=${beds}&radius=${PRIORITY_RADIUS_MILES}`,
+    },
+    {
+      name: 'OnTheMarket',
+      href: `https://www.onthemarket.com/for-sale/property/${areaSlug}/?max-price=${budget}&min-bedrooms=${beds}&radius=${PRIORITY_RADIUS_MILES}`,
+    },
   ];
   document.getElementById('listingLinks').innerHTML = links.map((l) => `<a href="${l.href}" target="_blank" rel="noreferrer">Open ${l.name}</a>`).join('');
 }
