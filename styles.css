@@ -63,6 +63,10 @@ h1 { margin: .4rem 0; font-size: clamp(1.8rem, 5vw, 2.5rem); }
 .pill { background: var(--accent-soft); color: #35388a; border-radius: 999px; padding: .2rem .6rem; font-size: .82rem; align-self: center; }
 
 .action-cards { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: .6rem; margin-bottom: .8rem; }
+
+.quick-jump { padding: .8rem 1rem; }
+.jump-links { display: flex; flex-wrap: wrap; gap: .65rem; }
+
 .action-card { background: #fbfcff; border: 1px solid var(--border); border-radius: 10px; padding: .7rem; }
 .action-card h3 { margin: .1rem 0; font-size: 1rem; }
 .text-link { color: #2f3fc9; font-weight: 700; text-decoration: none; }
@@ -79,8 +83,9 @@ input, textarea { font: inherit; border: 1px solid #cad3ef; border-radius: 10px;
 .tabs { display: flex; gap: .45rem; flex-wrap: wrap; margin-bottom: .8rem; }
 .tab { border: 1px solid #cad2f1; border-radius: 999px; background: #fff; color: #2f3a66; padding: .45rem .75rem; cursor: pointer; }
 .tab.active { background: var(--accent-soft); font-weight: 700; }
-.tab-panel { display: none; }
-.tab-panel.active { display: block; }
+.tab-panel { display: block; }
+.js-tabs .tab-panel { display: none; }
+.js-tabs .tab-panel.active { display: block; }
 
 .countdown-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(170px,1fr)); gap: .6rem; }
 .count-card { border: 1px solid var(--border); border-radius: 10px; padding: .65rem; background: #fcfdff; }
