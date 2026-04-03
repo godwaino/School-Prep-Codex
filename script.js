@@ -59,6 +59,7 @@ function generateQuestions(subject, rows) {
     options: row.options,
     correctOptionIndex: row.answer,
     explanation: row.explanation,
+    topicTags: row.topicTags || [row.topic.toLowerCase().replace(/[^a-z0-9]+/g, '-')],
     modeTags: ['daily5', 'mini', 'timed'],
     active: true,
     media: row.media || null,
@@ -190,6 +191,7 @@ const EMPTY_PROGRESS = {
   questionsAttempted: 0,
   correctAnswers: 0,
   accuracyBySubject: {},
+  accuracyByTopic: {},
   streak: 0,
   weakestArea: 'Not enough data yet',
   strongestArea: 'Not enough data yet',
@@ -260,6 +262,17 @@ function getSubjectAttemptCount(subject) {
   return progress.accuracyBySubject[subject]?.attempted || 0;
 }
 
+function getWeakestTopic(subject) {
+  const progress = getProgressData();
+  const topicEntries = Object.entries(progress.accuracyByTopic || {})
+    .filter(([key, value]) => key.startsWith(`${subject}:`) && value.attempted >= 3)
+    .map(([key, value]) => ({ key, accuracy: value.correct / value.attempted }))
+    .sort((a, b) => a.accuracy - b.accuracy);
+
+  if (!topicEntries.length) return null;
+  return topicEntries[0].key.split(':')[1].replace(/-/g, ' ');
+}
+
 function getStudyPriorityWeights() {
   const total = Number(weeklyHours.value || 8);
   const mathsWeight = Math.max(1, Math.round(total * 0.3));
@@ -310,12 +323,35 @@ function getRecommendation() {
       ? `Recommended because ${SUBJECTS[top.subject]} has lower coverage so far.`
       : `Recommended because ${SUBJECTS[top.subject]} has had less recent practice.`;
 
-  return { subject: top.subject, reason, reasonChips };
+  const weakestTopic = getWeakestTopic(top.subject);
+  const reasonWithTopic = weakestTopic ? `${reason} Focus topic: ${weakestTopic}.` : reason;
+  return { subject: top.subject, reason: reasonWithTopic, reasonChips };
 }
 
 function pickQuestions({ subject = 'mixed', size = 5, mode = 'daily5' }) {
   const pool = QUESTION_BANK.filter((q) => q.active && q.modeTags.includes(mode) && (subject === 'mixed' ? true : q.subject === subject));
-  return [...pool].sort(() => Math.random() - 0.5).slice(0, Math.min(size, pool.length));
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  const groups = {
+    easy: shuffled.filter((q) => q.difficulty === 'easy'),
+    medium: shuffled.filter((q) => q.difficulty === 'medium'),
+    hard: shuffled.filter((q) => q.difficulty === 'hard'),
+  };
+
+  const targets = size <= 5
+    ? { easy: 2, medium: 2, hard: 1 }
+    : { easy: 3, medium: 5, hard: 2 };
+
+  const selected = [];
+  ['easy', 'medium', 'hard'].forEach((difficulty) => {
+    selected.push(...groups[difficulty].slice(0, targets[difficulty]));
+  });
+
+  if (selected.length < size) {
+    const alreadyIds = new Set(selected.map((q) => q.id));
+    selected.push(...shuffled.filter((q) => !alreadyIds.has(q.id)).slice(0, size - selected.length));
+  }
+
+  return selected.slice(0, Math.min(size, pool.length)).sort(() => Math.random() - 0.5);
 }
 
 function renderNextDeadline() {
@@ -648,6 +684,11 @@ function renderSubjectCards() {
 function renderPracticeProgress() {
   const progress = getProgressData();
   const avgAccuracy = progress.questionsAttempted ? Math.round((progress.correctAnswers / progress.questionsAttempted) * 100) : 0;
+  const weakestTopic = Object.entries(progress.accuracyByTopic || {})
+    .filter(([, value]) => value.attempted >= 3)
+    .map(([key, value]) => ({ key, accuracy: value.correct / value.attempted }))
+    .sort((a, b) => a.accuracy - b.accuracy)[0];
+  const weakestTopicLabel = weakestTopic ? weakestTopic.key.split(':')[1].replace(/-/g, ' ') : 'Not enough topic data yet';
   const emptyMessage = progress.sessions.length
     ? ''
     : '<p class="small">No practice sessions yet. Start with Daily 5 to build a calm routine.</p>';
@@ -661,6 +702,7 @@ function renderPracticeProgress() {
       <p><strong>${progress.streak}</strong><span>recent streak (days)</span></p>
     </div>
     <p class="small">Strongest: ${progress.strongestArea} • Weakest: ${progress.weakestArea}</p>
+    <p class="small">Topic to revisit: ${weakestTopicLabel}</p>
     <p class="small">Last practiced: ${progress.lastPracticedDate ? new Date(progress.lastPracticedDate).toLocaleDateString('en-GB') : 'Not yet'}</p>
   `;
 }
@@ -866,6 +908,16 @@ function finishPracticeSession() {
   progress.accuracyBySubject[currentPracticeSession.subject].attempted += total;
   progress.accuracyBySubject[currentPracticeSession.subject].correct += correct;
 
+  currentPracticeSession.questions.forEach((question) => {
+    const topicKey = `${question.subject}:${question.topicTags[0]}`;
+    if (!progress.accuracyByTopic[topicKey]) {
+      progress.accuracyByTopic[topicKey] = { attempted: 0, correct: 0 };
+    }
+    const answer = currentPracticeSession.answers.find((item) => item.questionId === question.id);
+    progress.accuracyByTopic[topicKey].attempted += 1;
+    if (answer?.correct) progress.accuracyByTopic[topicKey].correct += 1;
+  });
+
   updateStrongWeak(progress);
   saveProgressData(progress);
 
@@ -877,11 +929,12 @@ function finishPracticeSession() {
   const questionBreakdown = currentPracticeSession.questions.map((q) => {
     const answer = currentPracticeSession.answers.find((a) => a.questionId === q.id);
     const picked = answer ? q.options[answer.selectedOptionIndex] : 'No answer';
+    const coachExplanation = `Why: ${q.explanation}`;
     return `
       <li>
         <p><strong>${q.prompt}</strong></p>
         <p class="small">Your answer: ${picked} • Correct: ${q.options[q.correctOptionIndex]}</p>
-        <p class="small">${q.explanation}</p>
+        <p class="small">${coachExplanation}</p>
       </li>
     `;
   }).join('');
