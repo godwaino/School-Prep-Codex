@@ -1,44 +1,45 @@
 const PRIORITY_RADIUS_MILES = 10.004;
-const TODAY = new Date();
 
 const KEY_DATES = [
-  { title: '11+ registration opens', date: '2026-05-07', critical: true, source: 'Warwickshire' },
-  { title: '11+ registration deadline', date: '2026-06-30', critical: true, source: 'Warwickshire' },
-  { title: 'Access arrangements deadline', date: '2026-06-30', critical: true, source: 'Warwickshire' },
-  { title: 'Access arrangements decisions (week commencing)', date: '2026-07-13', critical: false, source: 'Warwickshire' },
-  { title: 'Test invite letters (week commencing)', date: '2026-08-10', critical: false, source: 'Warwickshire' },
-  { title: '11+ test date 1', date: '2026-09-12', critical: true, source: 'Warwickshire' },
-  { title: '11+ test date 2', date: '2026-09-13', critical: true, source: 'Warwickshire' },
-  { title: 'Results available', date: '2026-10-16', critical: true, source: 'Warwickshire' },
-  { title: 'Residency evidence deadline (23:59)', date: '2026-12-31', critical: true, source: 'Lawrence Sheriff' },
-  { title: 'Year 7 starts', date: '2027-09-01', critical: false, source: 'School year' },
+  { title: '11+ registration opens', date: '2026-05-07', critical: true },
+  { title: '11+ registration deadline', date: '2026-06-30', critical: true },
+  { title: 'Access arrangements deadline', date: '2026-06-30', critical: true },
+  { title: 'Access arrangements decisions', date: '2026-07-13', critical: false, prefix: 'Week commencing ' },
+  { title: '11+ test invite letters', date: '2026-08-10', critical: false, prefix: 'Week commencing ' },
+  { title: '11+ test dates', date: '2026-09-12', critical: true, displayOverride: '12–13 September 2026' },
+  { title: '11+ results available', date: '2026-10-16', critical: true },
+  { title: 'Secondary application deadline', date: '2026-10-31', critical: true },
+  { title: 'Proof of address requested', date: '2026-12-01', critical: false, prefix: 'Week commencing ' },
+  { title: 'Proof of address deadline', date: '2026-12-31', critical: true, time: '23:59' },
+  { title: 'National Offer Day', date: '2027-03-01', critical: true },
 ];
 
 const COUNTDOWN_TARGETS = [
   { label: 'Registration deadline', date: '2026-06-30' },
-  { label: '11+ test date', date: '2026-09-12' },
-  { label: 'Results available', date: '2026-10-16' },
-  { label: 'Residency evidence deadline', date: '2026-12-31' },
+  { label: '11+ test dates', date: '2026-09-12' },
+  { label: 'Proof of address deadline', date: '2026-12-31' },
+  { label: 'National Offer Day', date: '2027-03-01' },
 ];
 
 const STUDY_PLAN = [
-  'Set weekly routine (same days/times each week).',
+  'Set weekly routine (same days and times).',
   'Complete 2 English/VR sessions.',
   'Complete 1 NVR session.',
   'Complete 1 Maths session.',
-  'Review mistakes and write 3 focus topics.',
-  'Run one timed mixed paper at the weekend.',
+  'Review mistakes and set 3 focus topics.',
+  'Complete one timed mixed paper this week.',
 ];
 
 const EVIDENCE_ITEMS = [
-  'House proof documents ready',
+  'Proof of address documents ready',
   'Open day notes saved',
   'Admissions call notes saved',
   '11+ registration confirmation saved',
-  'Residency evidence checklist completed',
+  'Proof of address checklist completed',
 ];
 
 const keyDatesList = document.getElementById('keyDatesList');
+const nextDeadlineCard = document.getElementById('nextDeadlineCard');
 const setupState = document.getElementById('setupState');
 const readinessBlock = document.getElementById('readinessBlock');
 const countdownCards = document.getElementById('countdownCards');
@@ -54,9 +55,21 @@ const budgetSlider = document.getElementById('budgetSlider');
 const budgetOutput = document.getElementById('budgetOutput');
 const parentNotes = document.getElementById('parentNotes');
 
+function formatDateUK(dateStr) {
+  return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(`${dateStr}T00:00:00`));
+}
+
+function displayDate(item) {
+  if (item.displayOverride) return item.displayOverride;
+  const base = formatDateUK(item.date);
+  const withPrefix = item.prefix ? `${item.prefix}${base}` : base;
+  return item.time ? `${withPrefix}, ${item.time}` : withPrefix;
+}
+
 function daysTo(dateStr) {
+  const today = new Date();
   const target = new Date(`${dateStr}T00:00:00`);
-  return Math.ceil((target - TODAY) / (1000 * 60 * 60 * 24));
+  return Math.ceil((target - today) / (1000 * 60 * 60 * 24));
 }
 
 function statusTag(date) {
@@ -64,6 +77,16 @@ function statusTag(date) {
   if (d < 0) return 'completed';
   if (d <= 21) return 'upcoming';
   return 'future';
+}
+
+function renderNextDeadline() {
+  const next = KEY_DATES.find((d) => daysTo(d.date) >= 0);
+  if (!next) return;
+  nextDeadlineCard.innerHTML = `
+    <p class="small">Next key date</p>
+    <h2>${displayDate(next)}</h2>
+    <p>${next.title}</p>
+  `;
 }
 
 function renderKeyDates() {
@@ -74,9 +97,8 @@ function renderKeyDates() {
     line.className = `date-item ${status} ${item.critical ? 'critical' : ''}`;
     line.innerHTML = `
       <div>
-        <p class="date">${item.date}</p>
+        <p class="date">${displayDate(item)}</p>
         <h3>${item.title}</h3>
-        <p class="small">Source: ${item.source}</p>
       </div>
       <span class="pill">${status === 'completed' ? 'Completed' : status === 'upcoming' ? 'Upcoming' : 'Planned'}</span>
     `;
@@ -90,7 +112,7 @@ function renderCountdowns() {
     const d = daysTo(item.date);
     const card = document.createElement('article');
     card.className = 'count-card';
-    card.innerHTML = `<h4>${item.label}</h4><p>${d < 0 ? 'Completed' : `${d} days`}</p><span>${item.date}</span>`;
+    card.innerHTML = `<h4>${item.label}</h4><p>${d < 0 ? 'Completed' : `${d} days`}</p><span>${formatDateUK(item.date)}</span>`;
     countdownCards.appendChild(card);
   });
 }
@@ -125,7 +147,7 @@ function renderSetupState() {
 
   if (doneCount < 3) {
     setupState.innerHTML = `
-      <p><strong>Complete these 3 steps to unlock your readiness score.</strong></p>
+      <p><strong>Complete these 3 steps to get started.</strong></p>
       <ul>
         <li>${setupDone.child ? '✅' : '⬜'} Add child details</li>
         <li>${setupDone.catchment ? '✅' : '⬜'} Check catchment eligibility</li>
@@ -133,7 +155,7 @@ function renderSetupState() {
       </ul>
     `;
   } else {
-    setupState.innerHTML = '<p class="small">Setup complete. Your readiness score is now active.</p>';
+    setupState.innerHTML = '<p class="small">Great start. Your planner is now personalised.</p>';
   }
 
   localStorage.setItem('setup-state', JSON.stringify({
@@ -146,7 +168,7 @@ function renderSetupState() {
 function renderReadiness() {
   const setupDone = Boolean(childName.value.trim()) && catchmentChecked.checked && Number(weeklyHours.value) > 0;
   if (!setupDone) {
-    readinessBlock.innerHTML = '<p>Finish setup above to activate readiness insights.</p>';
+    readinessBlock.innerHTML = '<p>You’re making a strong start. Finish the 3 setup steps above to unlock your readiness score.</p>';
     return;
   }
 
@@ -156,16 +178,19 @@ function renderReadiness() {
   const total = STUDY_PLAN.length + EVIDENCE_ITEMS.length;
   const score = Math.round((done / total) * 100);
 
-  const missing = [];
-  if (!Object.values(evidenceState).some(Boolean)) missing.push('Add at least one evidence item');
-  if (!Object.values(studyState).some(Boolean)) missing.push('Start this week\'s revision checklist');
+  let encouragement = 'You’ve made a strong start.';
+  if (score < 40) encouragement = 'A few important steps still need attention.';
+  if (score > 75) encouragement = 'You are in a strong position for upcoming deadlines.';
 
-  const nextAction = missing[0] || 'Keep your weekly checklist momentum going.';
+  const nextAction = !Object.values(evidenceState).some(Boolean)
+    ? 'Next, confirm catchment and save proof of address notes.'
+    : 'Next, keep your weekly revision checklist consistent.';
 
   readinessBlock.innerHTML = `
     <p class="score">Readiness score: ${score}%</p>
-    <p>You’ve set a revision plan and checked key dates. Next: ${nextAction}</p>
-    <p class="small">Why it matters: completing evidence and revision steps reduces deadline risk.</p>
+    <p>${encouragement}</p>
+    <p>${nextAction}</p>
+    <p class="small">Deadline Risk support: stay on top of upcoming key dates and evidence tasks.</p>
   `;
 }
 
@@ -179,8 +204,11 @@ function renderRisk() {
     const d = daysTo(k.date);
     return d >= 0 && d <= 30;
   }).length;
-  const label = urgent >= 3 ? 'Deadline Risk: High — focus on key dates this month.' : urgent >= 1 ? 'Deadline Risk: Medium — at least one major item is near.' : 'Deadline Risk: Low — no major deadlines this month.';
-  deadlineRisk.textContent = label;
+  deadlineRisk.textContent = urgent >= 3
+    ? 'Deadline Risk: High — multiple key milestones are within 30 days.'
+    : urgent >= 1
+      ? 'Deadline Risk: Medium — at least one key milestone is close.'
+      : 'Deadline Risk: Low — no major milestones within 30 days.';
 }
 
 function enableNotifications() {
@@ -188,9 +216,7 @@ function enableNotifications() {
   Notification.requestPermission().then((permission) => {
     if (permission !== 'granted') return;
     const next = KEY_DATES.find((k) => daysTo(k.date) >= 0);
-    if (next) {
-      new Notification(`Next key date: ${next.title}`, { body: `${next.date}` });
-    }
+    if (next) new Notification(`Next key date: ${next.title}`, { body: `${displayDate(next)}` });
   });
 }
 
@@ -243,6 +269,7 @@ function hydrateSavedSetup() {
 }
 
 hydrateSavedSetup();
+renderNextDeadline();
 renderKeyDates();
 renderCountdowns();
 renderChecklist(studyPlan, STUDY_PLAN, 'study-plan');
@@ -262,15 +289,18 @@ updateBudgetOutput();
   });
 });
 
+document.getElementById('jumpCatchment').addEventListener('click', () => {
+  document.querySelector('[data-tab="catchment"]').click();
+});
 parentNotes.addEventListener('input', () => localStorage.setItem('parent-notes', parentNotes.value));
 budgetSlider.addEventListener('input', updateBudgetOutput);
-
 document.getElementById('notifyBtn').addEventListener('click', enableNotifications);
 document.getElementById('calendarBtn').addEventListener('click', downloadICS);
 document.getElementById('listingForm').addEventListener('submit', createListingLinks);
 document.getElementById('printStudyPlan').addEventListener('click', () => window.print());
 
 setInterval(() => {
+  renderNextDeadline();
   renderCountdowns();
   renderRisk();
   renderKeyDates();

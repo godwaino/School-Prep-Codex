@@ -9,57 +9,73 @@
   <body>
     <header class="hero">
       <div class="wrap">
-        <p class="kicker">Year 7 entry: September 2027</p>
+        <p class="kicker">For parents preparing Year 7 entry in September 2027</p>
         <h1>Lawrence Sheriff 2027 Admissions Planner</h1>
-        <p class="subtitle">
-          Track the key deadlines, check catchment, organise evidence, plan
-          revision, and stay ahead for Year 7 entry in September 2027.
-        </p>
+        <p class="subtitle">Track key dates, check catchment, organise proof of address, plan revision, and stay ahead for Year 7 entry in September 2027.</p>
         <div class="hero-actions">
           <a href="#next-actions" class="btn">Start my plan</a>
-          <a href="#key-dates" class="btn btn-secondary">View 2027 key dates</a>
+          <a href="#key-dates" class="btn btn-secondary">View key dates</a>
         </div>
       </div>
     </header>
 
     <section class="trust-strip" aria-label="Trust information">
       <div class="wrap trust-grid">
-        <span>Built around official Warwickshire and Lawrence Sheriff admissions information</span>
+        <span>Based on official Warwickshire and Lawrence Sheriff admissions information</span>
         <span>2027 timeline verified</span>
-        <span>Local data saved on this device</span>
+        <span>Local data is saved on this device only</span>
+      </div>
+    </section>
+
+    <section class="next-deadline-wrap">
+      <div class="wrap">
+        <article class="next-deadline" id="nextDeadlineCard"></article>
       </div>
     </section>
 
     <main class="wrap main">
       <section id="key-dates" class="card sticky-card">
         <div class="section-head">
-          <h2>Key dates for 2027 entry</h2>
-          <button id="calendarBtn" class="btn-inline">Download calendar (.ics)</button>
+          <h2>Key Dates</h2>
+          <button id="calendarBtn" class="btn-inline">Download key dates (.ics)</button>
         </div>
+        <p class="small">Official milestones for September 2027 entry.</p>
         <div id="keyDatesList" class="date-list"></div>
       </section>
 
       <section id="next-actions" class="card">
-        <h2>Next 3 actions</h2>
+        <h2>Next Actions</h2>
+        <div class="action-cards">
+          <article class="action-card">
+            <h3>Add child details</h3>
+            <p>Why it matters: unlocks a personalised readiness view.</p>
+            <p class="small">Urgency: today</p>
+            <a href="#setupFields" class="text-link">Add now</a>
+          </article>
+          <article class="action-card">
+            <h3>Check catchment eligibility</h3>
+            <p>Why it matters: confirms whether proof of address planning is needed.</p>
+            <p class="small">Urgency: before summer 2026</p>
+            <button id="jumpCatchment" class="btn-inline">Review catchment</button>
+          </article>
+          <article class="action-card">
+            <h3>Set weekly revision hours</h3>
+            <p>Why it matters: creates a practical study rhythm before test dates.</p>
+            <p class="small">Urgency: this week</p>
+            <a href="#setupFields" class="text-link">Set hours</a>
+          </article>
+        </div>
+
         <div id="setupState" class="setup-state"></div>
-        <div class="setup-grid">
-          <label>
-            Add child details
-            <input id="childName" placeholder="Child first name" />
-          </label>
-          <label class="check-inline">
-            <input id="catchmentChecked" type="checkbox" />
-            I have checked catchment eligibility
-          </label>
-          <label>
-            Set weekly revision hours
-            <input id="weeklyHours" type="number" min="1" max="40" value="8" />
-          </label>
+        <div id="setupFields" class="setup-grid">
+          <label>Add child details<input id="childName" placeholder="Child first name" /></label>
+          <label class="check-inline"><input id="catchmentChecked" type="checkbox" />I have checked catchment eligibility</label>
+          <label>Set weekly revision hours<input id="weeklyHours" type="number" min="1" max="40" value="8" /></label>
         </div>
       </section>
 
       <section class="card">
-        <h2>Readiness overview</h2>
+        <h2>Readiness and Deadline Risk</h2>
         <div id="readinessBlock" class="readiness"></div>
       </section>
 
@@ -88,14 +104,14 @@
         </section>
 
         <section id="tab-catchment" class="tab-panel" role="tabpanel">
-          <h3>Catchment guidance</h3>
+          <h3>Catchment and proof of address</h3>
           <div class="badges">
             <span class="badge">Verified source</span>
-            <span class="badge">Last checked: 3 April 2026</span>
+            <span class="badge">Last verified: 3 April 2026</span>
           </div>
           <p><strong>Priority Circle:</strong> 10.004 miles from Rugby Water Tower.</p>
-          <p><strong>Residency evidence deadline:</strong> 31 December 2026 at 23:59.</p>
-          <p><strong>Eastern Area of Warwickshire:</strong> includes Rugby and specified local parishes in the admissions policy.</p>
+          <p><strong>Proof of address deadline:</strong> 31 December 2026, 23:59.</p>
+          <p><strong>Eastern Area of Warwickshire:</strong> Rugby and specific listed parishes.</p>
           <details>
             <summary>View Eastern Area place list</summary>
             <p class="small">Dunchurch, Cawston, Thurlaston, Leamington Hastings, Birdingbury, Grandborough, Wolfhamcote, Willoughby, Binley Woods, Brinklow, Brandon and Bretford, Ryton-on-Dunsmore, Bubbenhall, Wolston, Church Lawford, Long Lawford, Stretton-on-Dunsmore, Princethorpe, Frankton, Marton, Bourton and Draycote, Churchover, Clifton-upon-Dunsmore, Combe Fields, Cosford, Easenhall, Harborough Magna, Kings Newnham, Little Lawford, Monks Kirby, Newton and Biggin, Pailton, Stretton-under-Fosse, Wibtoft, Willey, Withybrook.</p>
@@ -105,14 +121,11 @@
 
         <section id="tab-property" class="tab-panel" role="tabpanel">
           <h3>Explore homes in catchment</h3>
-          <p class="small">Useful for planning only — admissions deadlines and eligibility still come first.</p>
+          <p class="small">Property search supports planning, but admissions deadlines remain the priority.</p>
           <form id="listingForm" class="property-form">
             <label>Area<input id="area" value="Rugby" required /></label>
             <label>Bedrooms<input id="bedrooms" type="number" value="3" min="1" max="8" /></label>
-            <label>Budget cap
-              <input id="budgetSlider" type="range" min="100000" max="1200000" step="5000" value="500000" />
-              <output id="budgetOutput">£500,000</output>
-            </label>
+            <label>Budget cap<input id="budgetSlider" type="range" min="100000" max="1200000" step="5000" value="500000" /><output id="budgetOutput">£500,000</output></label>
             <button type="submit" class="btn-inline">Find listings</button>
           </form>
           <div id="listingLinks" class="listing-links"></div>
@@ -122,7 +135,7 @@
           <h3>Evidence Folder</h3>
           <p class="small">Keep everything in one place so nothing gets missed.</p>
           <div id="evidenceChecklist" class="checklist"></div>
-          <textarea id="parentNotes" rows="8" placeholder="House proofs, open day notes, admissions calls, registration confirmations..."></textarea>
+          <textarea id="parentNotes" rows="8" placeholder="Proof of address, open day notes, admissions call notes, test registration confirmations..."></textarea>
         </section>
       </section>
 
