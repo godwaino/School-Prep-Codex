@@ -200,6 +200,110 @@ QUESTION_BANK.forEach((question) => {
   }
 });
 
+function buildExtraQuestions() {
+  const englishRows = [
+    ['Vocabulary', 'easy', 'Choose the closest meaning of "precise".', ['Exact', 'Heavy', 'Loud', 'Lucky'], 0, 'Precise means exact and accurate.'],
+    ['Antonyms', 'easy', 'What is the opposite of "noisy"?', ['Bright', 'Quiet', 'Busy', 'Quick'], 1, 'Quiet is the opposite of noisy.'],
+    ['Grammar', 'medium', 'Choose the correct sentence.', ['She don’t like apples.', 'She doesn’t like apples.', 'She not likes apples.', 'She didn’t likes apples.'], 1, 'With "she", use doesn’t in present tense.'],
+    ['Comprehension', 'medium', 'If a text says "the path was treacherous", the path was...', ['safe', 'dangerous', 'short', 'crowded'], 1, 'Treacherous means dangerous and difficult.'],
+    ['Punctuation', 'easy', 'Which sentence is punctuated correctly?', ['Its raining outside.', 'It’s raining outside.', 'Its’ raining outside.', 'It,s raining outside.'], 1, 'It’s = it is.'],
+    ['Synonyms', 'medium', 'Closest meaning to "observe".', ['Ignore', 'Watch', 'Forget', 'Hide'], 1, 'Observe means to watch carefully.'],
+    ['Inference', 'hard', '"Mia zipped her coat before stepping out." What is likely true?', ['It is warm outside', 'It may be cold outside', 'She forgot her bag', 'She is indoors'], 1, 'Zipping a coat suggests colder weather.'],
+    ['Word class', 'easy', 'Which word is a verb?', ['Careful', 'Jump', 'Softly', 'Blue'], 1, 'Jump is an action, so it is a verb.'],
+    ['Comprehension', 'hard', 'A paragraph ending with a cliff-hanger is meant to...', ['explain a chart', 'build suspense', 'list facts', 'summarise quickly'], 1, 'Cliff-hangers create suspense and keep readers engaged.'],
+    ['Spelling', 'medium', 'Select the correct spelling.', ['Occasion', 'Occasionn', 'Ocassion', 'Ocasion'], 0, 'Occasion is the correct spelling.'],
+  ];
+
+  const mathsRows = Array.from({ length: 10 }, (_, i) => {
+    const a = 14 + i;
+    const b = 9 + i;
+    const correct = a + b;
+    const options = [correct - 2, correct, correct + 2, correct + 4];
+    return {
+      topic: i < 4 ? 'Arithmetic' : i < 7 ? 'Fractions' : 'Number',
+      difficulty: i < 3 ? 'easy' : i < 7 ? 'medium' : 'hard',
+      prompt: i < 4
+        ? `What is ${a} + ${b}?`
+        : i < 7
+          ? `What is ${i + 2}/${i + 5} of ${(i + 5) * 6}?`
+          : `Round ${(i + 31) * 137} to the nearest hundred.`,
+      options: i < 4
+        ? options.map(String)
+        : i < 7
+          ? ['12', '18', '24', '30']
+          : [String(Math.round((((i + 31) * 137) - 40) / 100) * 100), String(Math.round(((i + 31) * 137) / 100) * 100), String(Math.round((((i + 31) * 137) + 40) / 100) * 100), String(Math.round((((i + 31) * 137) + 90) / 100) * 100)],
+      answer: i < 4 ? 1 : i < 7 ? 1 : 1,
+      explanation: i < 4
+        ? `Add ${a} and ${b} to get ${correct}.`
+        : i < 7
+          ? 'Convert the fraction into equal groups and multiply by the total.'
+          : 'Look at the tens digit to decide whether to round down or up.',
+    };
+  });
+
+  const verbalRows = [
+    ['Analogies', 'easy', 'Cup is to drink as plate is to ...', ['read', 'eat', 'run', 'write'], 1, 'A plate is used for eating.'],
+    ['Letter sequence', 'medium', 'What comes next: B, E, I, N, ...', ['S', 'T', 'R', 'Q'], 1, 'Gaps are +3, +4, +5, so next is +6 to T.'],
+    ['Codes', 'medium', 'If RED = 27 and BLUE = 40, BAT = ?', ['23', '24', '25', '26'], 1, 'Using position values, B(2)+A(1)+T(20)=23, then pattern offset +1 = 24.'],
+    ['Antonyms', 'easy', 'Opposite of "scarce".', ['Rare', 'Plentiful', 'Simple', 'Dull'], 1, 'Plentiful is the opposite of scarce.'],
+    ['Word relation', 'medium', 'Pilot is to plane as captain is to ...', ['ship', 'car', 'train', 'bike'], 0, 'A captain controls a ship.'],
+    ['Classification', 'easy', 'Which does not belong?', ['Oak', 'Pine', 'Rose', 'Maple'], 2, 'Rose is not a tree.'],
+    ['Anagrams', 'hard', 'Which is an anagram of ALERT?', ['LATER', 'ALTER', 'ARTEL', 'all of these'], 3, 'All three listed are valid anagrams.'],
+    ['Alphabet logic', 'medium', 'Two letters before M is ...', ['J', 'K', 'L', 'N'], 1, 'M -> L (one before), K (two before).'],
+    ['Synonyms', 'hard', 'Closest meaning to "diligent".', ['Careless', 'Hardworking', 'Polite', 'Quiet'], 1, 'Diligent means hardworking.'],
+    ['Compound words', 'easy', 'Which pairs with "book" to form a common word?', ['tree', 'case', 'river', 'stone'], 1, 'Bookcase is a common compound word.'],
+  ];
+
+  const nvrRows = [
+    ['Pattern sequence', 'easy', 'Pattern: ● ○ ● ○ ... What comes next?', ['●', '○', '■', '▲'], 0, 'The pattern alternates black and white circles.'],
+    ['Rotation', 'medium', 'A right-pointing arrow rotated 180° points...', ['right', 'left', 'up', 'down'], 1, 'A half turn reverses direction.'],
+    ['Symmetry', 'medium', 'Which shape has exactly 2 lines of symmetry?', ['Rectangle', 'Scalene triangle', 'Parallelogram', 'Arrow'], 0, 'A rectangle has two lines of symmetry.'],
+    ['Series', 'hard', 'Shaded squares count: 1, 3, 5, ... next?', ['6', '7', '8', '9'], 1, 'The sequence increases by 2 each step.'],
+    ['Mirror image', 'medium', 'In a horizontal mirror, an up arrow points...', ['up', 'down', 'left', 'right'], 1, 'Horizontal reflection flips top and bottom.'],
+    ['Odd one out', 'easy', 'Choose the odd one out.', ['▲▲', '■■', '●●', '▲■'], 3, 'Only ▲■ contains two different symbols.'],
+    ['Spatial', 'hard', 'How many vertices does a cube have?', ['6', '8', '10', '12'], 1, 'A cube has 8 vertices.'],
+    ['Transformation', 'medium', 'If shape colour changes each step black↔white, after 3 steps black becomes...', ['black', 'white', 'grey', 'striped'], 1, 'Black->white->black->white over 3 changes.'],
+    ['Grid logic', 'medium', 'A 2x2 grid with one shaded square doubles shaded squares each step. Step 3 has...', ['2', '3', '4', '5'], 2, '1 -> 2 -> 4 shaded squares.'],
+    ['Pattern memory', 'easy', 'Which string repeats ABCA?', ['ABCA', 'ABAC', 'AABC', 'ACBA'], 0, 'ABCA matches exactly.'],
+  ];
+
+  return {
+    english: englishRows.map((row) => ({ topic: row[0], difficulty: row[1], prompt: row[2], options: row[3], answer: row[4], explanation: row[5] })),
+    maths: mathsRows,
+    verbal: verbalRows.map((row) => ({ topic: row[0], difficulty: row[1], prompt: row[2], options: row[3], answer: row[4], explanation: row[5] })),
+    nvr: nvrRows.map((row) => ({ topic: row[0], difficulty: row[1], prompt: row[2], options: row[3], answer: row[4], explanation: row[5] })),
+  };
+}
+
+function extendQuestionBankToThirtyPerSubject() {
+  const extras = buildExtraQuestions();
+  Object.keys(SUBJECTS).forEach((subject) => {
+    const existingCount = QUESTION_BANK.filter((q) => q.subject === subject).length;
+    const needed = Math.max(0, 30 - existingCount);
+    if (!needed) return;
+    const extraRows = extras[subject].slice(0, needed);
+    const startIndex = existingCount;
+    extraRows.forEach((row, idx) => {
+      QUESTION_BANK.push({
+        id: `${subject}-${startIndex + idx + 1}`,
+        subject,
+        topic: row.topic,
+        difficulty: row.difficulty,
+        prompt: row.prompt,
+        options: row.options,
+        correctOptionIndex: row.answer,
+        explanation: row.explanation,
+        topicTags: [row.topic.toLowerCase().replace(/[^a-z0-9]+/g, '-')],
+        modeTags: ['daily5', 'mini', 'timed'],
+        active: true,
+        media: null,
+      });
+    });
+  });
+}
+
+extendQuestionBankToThirtyPerSubject();
+
 function runPracticeIntegrityChecks() {
   const issues = [];
   const countsBySubject = Object.keys(SUBJECTS).reduce((acc, key) => ({ ...acc, [key]: 0 }), {});
@@ -221,7 +325,7 @@ function runPracticeIntegrityChecks() {
   });
 
   Object.entries(countsBySubject).forEach(([subject, count]) => {
-    if (count < 20) issues.push(`[${subject}] has ${count} questions (expected at least 20).`);
+    if (count < 30) issues.push(`[${subject}] has ${count} questions (expected at least 30).`);
   });
 
   if (issues.length) {
@@ -264,6 +368,7 @@ const EMPTY_PROGRESS = {
   correctAnswers: 0,
   accuracyBySubject: {},
   accuracyByTopic: {},
+  recentQuestionIdsBySubject: {},
   streak: 0,
   weakestArea: 'Not enough data yet',
   strongestArea: 'Not enough data yet',
@@ -345,6 +450,15 @@ function getWeakestTopic(subject) {
   return topicEntries[0].key.split(':')[1].replace(/-/g, ' ');
 }
 
+function getStudentLevel(subject) {
+  const accuracy = getSubjectAccuracy(subject);
+  const attempts = getSubjectAttemptCount(subject);
+  if (attempts < 12 || accuracy === null) return 'foundation';
+  if (accuracy < 70) return 'foundation';
+  if (accuracy < 85) return 'core';
+  return 'stretch';
+}
+
 function getStudyPriorityWeights() {
   const total = Number(weeklyHours.value || 8);
   const mathsWeight = Math.max(1, Math.round(total * 0.3));
@@ -401,17 +515,26 @@ function getRecommendation() {
 }
 
 function pickQuestions({ subject = 'mixed', size = 5, mode = 'daily5' }) {
-  const pool = QUESTION_BANK.filter((q) => q.active && q.modeTags.includes(mode) && (subject === 'mixed' ? true : q.subject === subject));
-  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  const level = subject === 'mixed' ? 'core' : getStudentLevel(subject);
+  const progress = getProgressData();
+  const recentIds = new Set(progress.recentQuestionIdsBySubject?.[subject] || []);
+
+  const basePool = QUESTION_BANK.filter((q) => q.active && q.modeTags.includes(mode) && (subject === 'mixed' ? true : q.subject === subject));
+  const pool = basePool.filter((q) => !recentIds.has(q.id));
+  const effectivePool = pool.length >= size ? pool : basePool;
+  const shuffled = [...effectivePool].sort(() => Math.random() - 0.5);
   const groups = {
     easy: shuffled.filter((q) => q.difficulty === 'easy'),
     medium: shuffled.filter((q) => q.difficulty === 'medium'),
     hard: shuffled.filter((q) => q.difficulty === 'hard'),
   };
 
-  const targets = size <= 5
-    ? { easy: 2, medium: 2, hard: 1 }
-    : { easy: 3, medium: 5, hard: 2 };
+  const targetsByLevel = {
+    foundation: size <= 5 ? { easy: 3, medium: 2, hard: 0 } : { easy: 6, medium: 3, hard: 1 },
+    core: size <= 5 ? { easy: 2, medium: 2, hard: 1 } : { easy: 3, medium: 5, hard: 2 },
+    stretch: size <= 5 ? { easy: 1, medium: 2, hard: 2 } : { easy: 2, medium: 4, hard: 4 },
+  };
+  const targets = targetsByLevel[level];
 
   const selected = [];
   ['easy', 'medium', 'hard'].forEach((difficulty) => {
@@ -423,7 +546,7 @@ function pickQuestions({ subject = 'mixed', size = 5, mode = 'daily5' }) {
     selected.push(...shuffled.filter((q) => !alreadyIds.has(q.id)).slice(0, size - selected.length));
   }
 
-  return selected.slice(0, Math.min(size, pool.length)).sort(() => Math.random() - 0.5);
+  return selected.slice(0, Math.min(size, effectivePool.length)).sort(() => Math.random() - 0.5);
 }
 
 function renderNextDeadline() {
@@ -640,13 +763,6 @@ function initTabs() {
     });
   });
 
-  document.querySelectorAll('[data-start-mode]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const mode = btn.dataset.startMode;
-      startPracticeSession(mode, mode === 'daily5' ? 'mixed' : getRecommendation().subject);
-    });
-  });
-
   const initial = document.querySelector('.tab.active')?.dataset.tab || 'dashboard';
   activate(initial, false);
 }
@@ -706,9 +822,11 @@ function hydrateSavedSetup() {
 
 function renderTodayPracticeCard() {
   const recommendation = getRecommendation();
+  const level = getStudentLevel(recommendation.subject);
   todayPracticeCard.innerHTML = `
     <h4>Today’s Practice</h4>
     <p><strong>Recommended focus:</strong> ${SUBJECTS[recommendation.subject]}</p>
+    <p class="small">Current level: ${level === 'foundation' ? 'Foundation' : level === 'core' ? 'Core' : 'Stretch'}</p>
     <p>5 questions • Estimated time: 8–10 minutes</p>
     <div class="reason-chips">${recommendation.reasonChips.map((chip) => `<span class="badge">${chip.label}</span>`).join('')}</div>
     <button class="btn-inline" id="startTodayPractice">Start</button>
@@ -728,9 +846,11 @@ function renderTodayPracticeCard() {
 
 function renderRecommendedPractice() {
   const recommendation = getRecommendation();
+  const level = getStudentLevel(recommendation.subject);
   recommendedPractice.innerHTML = `
     <h4>Recommended next practice</h4>
     <p>${SUBJECTS[recommendation.subject]} Daily 5</p>
+    <p class="small">Current level: ${level === 'foundation' ? 'Foundation' : level === 'core' ? 'Core' : 'Stretch'}</p>
     <div class="reason-chips">${recommendation.reasonChips.map((chip) => `<span class="badge">${chip.label}</span>`).join('')}</div>
     <p class="small">${recommendation.reason}</p>
     <button class="btn-inline" id="startRecommendedPractice">Start recommended session</button>
@@ -830,6 +950,7 @@ function startPracticeSession(mode, subject = 'mixed') {
     timeRemainingSeconds: config.timeSeconds,
     timerHandle: null,
     feedbackMode,
+    level: config.subject === 'mixed' ? 'core' : getStudentLevel(config.subject),
   };
 
   practiceResults.innerHTML = '';
@@ -877,6 +998,7 @@ function renderPracticeQuestion() {
   practiceSession.innerHTML = `
     <div class="practice-sticky">
       <p><strong>${currentPracticeSession.title}</strong> • ${SUBJECTS[currentPracticeSession.subject] || 'Mixed'}</p>
+      <p class="small">Level: ${currentPracticeSession.level === 'foundation' ? 'Foundation' : currentPracticeSession.level === 'core' ? 'Core' : 'Stretch'}</p>
       <p>Question ${currentPracticeSession.currentQuestionIndex + 1} of ${currentPracticeSession.questions.length}</p>
       ${currentPracticeSession.timeLimitSeconds > 0 ? `<p aria-live="polite">Time left: <strong id="practiceTimer"></strong></p>` : ''}
       <div class="progress-bar"><div class="progress-fill" style="width:${progressPct}%"></div></div>
@@ -995,6 +1117,10 @@ function finishPracticeSession() {
     correct,
     timeTakenSeconds,
   });
+
+  const recent = progress.recentQuestionIdsBySubject?.[currentPracticeSession.subject] || [];
+  const usedNow = currentPracticeSession.questions.map((q) => q.id);
+  progress.recentQuestionIdsBySubject[currentPracticeSession.subject] = [...new Set([...usedNow, ...recent])].slice(0, 24);
 
   progress.questionsAttempted += total;
   progress.correctAnswers += correct;
