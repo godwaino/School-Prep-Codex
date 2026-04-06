@@ -23,3 +23,13 @@ Examples in product UI:
 ## Run
 
 Open `index.html` in a browser.
+
+## Practice data sanity check
+
+To validate practice content integrity and syntax before sharing:
+
+```bash
+node --check script.js
+```
+
+Then open the app once in a browser and check the console for any `Practice integrity checks` warnings emitted by `runPracticeIntegrityChecks()` in `script.js`.
